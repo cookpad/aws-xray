@@ -1,7 +1,2 @@
-require "aws/xray/version"
-
-module Aws
-  module Xray
-    # Your code goes here...
-  end
-end
+require 'aws/xray/version'
+require 'aws/xray/rack'
