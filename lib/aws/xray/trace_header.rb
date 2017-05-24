@@ -44,6 +44,11 @@ module Aws
       def has_parent?
         !!@parent
       end
+
+      def copy(parent: nil)
+        parent = parent.nil? ? @parent : parent
+        self.class.new(root: @root, sampled: @sampled, parent: parent)
+      end
     end
   end
 end

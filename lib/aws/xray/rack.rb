@@ -15,8 +15,6 @@ module Aws
         @client = Client.new(client_options)
       end
 
-      TRACE_HEADER = 'X-Amzn-Trace-Id'.freeze
-
       def call(env)
         header_value = env[TRACE_ENV]
         trace_header = if header_value
