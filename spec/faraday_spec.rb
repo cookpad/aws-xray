@@ -21,58 +21,71 @@ RSpec.describe Aws::Xray::Faraday do
   end
   let(:trace_header) { Aws::Xray::TraceHeader.new(root: '1-67891233-abcdef012345678912345678') }
 
-
-  it do
-    res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace_header) do
-      Aws::Xray::Context.current.base_trace do
-        client.get('/foo')
+  context 'without name option' do
+    it 'uses host header value' do
+      res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace_header) do
+        Aws::Xray::Context.current.base_trace do
+          client.get('/foo')
+        end
       end
+      expect(res.status).to eq(200)
+      expect(res.headers).to eq({})
+
+      io.rewind
+      sent_jsons = io.read.split("\n")
+      expect(sent_jsons.size).to eq(4)
+      header_json, body_json = sent_jsons[0..1]
+      _, parent_body_json = sent_jsons[2..3]
+
+      expect(JSON.parse(header_json)).to eq("format" => "json", "version" => 1)
+      body = JSON.parse(body_json)
+      parent_body = JSON.parse(parent_body_json)
+
+      expect(body['name']).to eq('target-app')
+      expect(body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
+      expect(body['parent_id']).to eq(parent_body['id'])
+      expect(body['type']).to eq('subsegment')
+      expect(body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
+      expect(Float(body['start_time'])).not_to eq(0)
+      expect(Float(body['end_time'])).not_to eq(0)
+
+      request_part = body['http']['request']
+      expect(request_part['method']).to eq('GET')
+      expect(request_part['url']).to eq('http:/foo')
+      expect(request_part['user_agent']).to match(/Faraday/)
+      expect(request_part['client_ip']).to be_nil
+      expect(request_part).not_to have_key('x_forwarded_for')
+      expect(request_part['traced']).to eq(false)
+
+      expect(body['http']['response']['status']).to eq(200)
+      expect(body['http']['response']['content_length']).to be_nil
+
+      expect(res.body).to eq("Root=1-67891233-abcdef012345678912345678;Sampled=1;Parent=#{body['id']}")
     end
-    expect(res.status).to eq(200)
-    expect(res.headers).to eq({})
-
-    io.rewind
-    sent_jsons = io.read.split("\n")
-    expect(sent_jsons.size).to eq(4)
-    header_json, body_json = sent_jsons[0..1]
-    _, parent_body_json = sent_jsons[2..3]
-
-    expect(JSON.parse(header_json)).to eq("format" => "json", "version" => 1)
-    body = JSON.parse(body_json)
-    parent_body = JSON.parse(parent_body_json)
-
-    expect(body['name']).to eq('target-app')
-    expect(body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
-    expect(body['parent_id']).to eq(parent_body['id'])
-    expect(body['type']).to eq('subsegment')
-    expect(body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
-    expect(Float(body['start_time'])).not_to eq(0)
-    expect(Float(body['end_time'])).not_to eq(0)
-
-    expect(res.body).to eq("Root=1-67891233-abcdef012345678912345678;Sampled=1;Parent=#{body['id']}")
   end
 
-  it do
-    client = Faraday.new do |builder|
-      builder.use Aws::Xray::Faraday, 'another-name'
-      builder.adapter :test, stubs
-    end
-
-    res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace_header) do
-      Aws::Xray::Context.current.base_trace do
-        client.get('/foo')
+  context 'when name option is given via builder' do
+    it 'sets given name to trace name' do
+      client = Faraday.new do |builder|
+        builder.use Aws::Xray::Faraday, 'another-name'
+        builder.adapter :test, stubs
       end
+
+      res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace_header) do
+        Aws::Xray::Context.current.base_trace do
+          client.get('/foo')
+        end
+      end
+      expect(res.status).to eq(200)
+      expect(res.headers).to eq({})
+
+      io.rewind
+      sent_jsons = io.read.split("\n")
+      expect(sent_jsons.size).to eq(4)
+      _, body_json = sent_jsons[0..1]
+
+      body = JSON.parse(body_json)
+      expect(body['name']).to eq('another-name')
     end
-    expect(res.status).to eq(200)
-    expect(res.headers).to eq({})
-
-    io.rewind
-    sent_jsons = io.read.split("\n")
-    expect(sent_jsons.size).to eq(4)
-    _, body_json = sent_jsons[0..1]
-
-    body = JSON.parse(body_json)
-    expect(body['name']).to eq('another-name')
   end
-
 end

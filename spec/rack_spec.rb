@@ -35,6 +35,13 @@ RSpec.describe Aws::Xray::Rack do
       # Test they are valid float value and are not 0.
       expect(Float(body['start_time'])).not_to eq(0)
       expect(Float(body['end_time'])).not_to eq(0)
+
+      request_part = body['http']['request']
+      expect(request_part).to have_key('x_forwarded_for')
+      expect(request_part).not_to have_key('traced')
+
+      expect(body['http']['response']['status']).to eq(200)
+      expect(body['http']['response']['content_length']).to be_nil
     end
   end
 
