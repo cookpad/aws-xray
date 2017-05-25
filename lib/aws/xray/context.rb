@@ -46,7 +46,7 @@ module Aws
       end
 
       def base_trace
-        res = yield
+        res = yield @base_segment
         @client.send_segment(@base_segment)
         res
       rescue => e

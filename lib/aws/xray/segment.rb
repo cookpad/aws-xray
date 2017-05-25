@@ -1,5 +1,7 @@
 require 'json'
 require 'securerandom'
+require 'aws/xray/request'
+require 'aws/xray/response'
 
 module Aws
   module Xray
@@ -28,10 +30,13 @@ module Aws
 
       # @param [Hash] env A Rack env
       def set_http_request(env)
+        @http_request = Request.build_from_rack_env(env)
       end
 
-      # @param [Array] res A Rack response
-      def set_http_response(res)
+      # @param [Integer] status HTTP status
+      # @param [Integer] length Size of HTTP response body
+      def set_http_response(status, length)
+        @http_response = Response.new(status, length)
       end
 
       def set_error(e)
@@ -53,6 +58,16 @@ module Aws
           trace_id: @trace_id,
           start_time: @start_time,
         }
+        if @http_request
+          request_hash = @http_request.to_h
+          # traced is SubSegment only
+          request_hash.delete(:traced)
+          h[:http] = { request:  request_hash }
+        end
+        if @http_response
+          h[:http] ||= {}
+          h[:http][:response] = @http_response.to_h
+        end
         if @end_time.nil?
           h[:in_progress] = true
         else
