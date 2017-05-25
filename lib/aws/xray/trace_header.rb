@@ -45,8 +45,7 @@ module Aws
         !!@parent
       end
 
-      def copy(parent: nil)
-        parent = parent.nil? ? @parent : parent
+      def copy(parent:)
         self.class.new(root: @root, sampled: @sampled, parent: parent)
       end
     end
