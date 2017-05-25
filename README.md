@@ -1,8 +1,21 @@
 # Aws::Xray
+The unofficial AWS X-Ray Tracing SDK for Ruby.
+It enables you to capture in-coming HTTP requests and out-going HTTP requests and send them to xray-agent automatically.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/aws/xray`. To experiment with that code, run `bin/console` for an interactive prompt.
+AWS X-Ray is a ditributed tracing system. See more detail about AWS X-Ray at [official document](http://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html).
 
-TODO: Delete this and the text above, and describe your gem
+## Current status
+Implemented:
+
+- Rack middleware.
+- Faraday middleware.
+- Propagatin support limited in single thread environment.
+
+Not yet:
+
+- Tracing HTTP request/response.
+- Multi thread support.
+- Tracing errors.
 
 ## Installation
 
@@ -16,13 +29,54 @@ And then execute:
 
     $ bundle
 
-Or install it yourself as:
-
-    $ gem install aws-xray
-
 ## Usage
+### Rack app
+```ruby
+# config.ru
+require 'aws-xray'
+use Aws::Xray::Rack
+```
 
-TODO: Write usage instructions here
+This allow your app to trace in-coming HTTP requests.
+
+To trace out-going HTTP requests, use Faraday middleware.
+
+```ruby
+Faraday.new('...', headers: { 'Host' => 'down-stream-app-id' } ) do |builder|
+  builder.use Aws::Xray::Faraday
+  # ...
+end
+```
+
+If you don't use any Service Discovery tools, pass the down stream app name to the Faraday middleware:
+
+```ruby
+Faraday.new('...') do |builder|
+  builder.use Aws::Xray::Faraday, name: 'down-stream-app-id'
+  # ...
+end
+```
+
+### non-Rack app (like background jobs)
+```ruby
+# Build HTTP client with Faraday builder.
+# You can set the down stream app id to Host header as well.
+client = Faraday.new('...') do |builder|
+  builder.use Aws::Xray::Faraday, name: 'down-stream-app-id'
+  # ...
+end
+
+# Start new tracing context then perform arbitrary actions in the block.
+Aws::Xray::Context.with_new_context('test-app', xray_client, trace_header) do
+  Aws::Xray::Context.current.base_trace do
+    client.get('/foo')
+
+    Aws::Xray::Context.current.child_trace do |sub|
+      # DB access or something to trace.
+    end
+  end
+end
+```
 
 ## Development
 
@@ -32,7 +86,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/aws-xray.
+Bug reports and pull requests are welcome on GitHub at https://github.com/taiki45/aws-xray.
 
 ## License
 
