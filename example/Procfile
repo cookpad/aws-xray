@@ -1,0 +1,5 @@
+front: env RECIPE_APP=127.0.0.1:3001 bundle exec rackup fron_app_config.ru -o 127.0.0.1 -p 3000
+recipe: env USER_APP=127.0.0.1:3002 CAMPAIN_APP=127.0.0.1:3003 bundle exec rackup recipe_app_config.ru -o 127.0.0.1 -p 3001
+user: bundle exec rackup user_app_config.ru -o 127.0.0.1 -p 3002
+campain: bundle exec rackup campain_app_config.ru -o 127.0.0.1 -p 3003
+agent: socat UDP-RECVFROM:2000,fork STDOUT

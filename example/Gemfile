@@ -1,0 +1,7 @@
+source 'https://rubygems.org'
+
+gem 'faraday'
+gem 'rack'
+gem 'aws-xray', path: File.expand_path('../', __dir__)
+
+gem 'foreman'
