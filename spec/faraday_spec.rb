@@ -51,4 +51,28 @@ RSpec.describe Aws::Xray::Faraday do
 
     expect(res.body).to eq("Root=1-67891233-abcdef012345678912345678;Sampled=1;Parent=#{body['id']}")
   end
+
+  it do
+    client = Faraday.new do |builder|
+      builder.use Aws::Xray::Faraday, 'another-name'
+      builder.adapter :test, stubs
+    end
+
+    res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace_header) do
+      Aws::Xray::Context.current.base_trace do
+        client.get('/foo')
+      end
+    end
+    expect(res.status).to eq(200)
+    expect(res.headers).to eq({})
+
+    io.rewind
+    sent_jsons = io.read.split("\n")
+    expect(sent_jsons.size).to eq(4)
+    _, body_json = sent_jsons[0..1]
+
+    body = JSON.parse(body_json)
+    expect(body['name']).to eq('another-name')
+  end
+
 end

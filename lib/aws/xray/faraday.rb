@@ -3,9 +3,14 @@ require 'faraday'
 module Aws
   module Xray
     class Faraday < ::Faraday::Middleware
+      def initialize(app, name = nil)
+        super(app)
+        @name = name
+      end
+
       # XXX: use host header?
       def call(req_env)
-        name = req_env.request_headers['Host'] || "unknown-request-from-#{Context.current.name}"
+        name = @name || req_env.request_headers['Host'] || "unknown-request-from-#{Context.current.name}"
 
         Context.current.child_trace(remote: true, name: name) do |sub|
           propagate_trace_header = sub.generate_trace_header
