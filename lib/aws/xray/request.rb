@@ -9,7 +9,18 @@ module Aws
           env['HTTP_USER_AGENT'], # user_agent
           env['X-Forwarded-For'], # client_ip
           !!env['X-Forwarded-For'], # x_forwarded_for
-          false,
+          false, # traced
+        )
+      end
+
+      def self.build_from_faraday_env(env)
+        new(
+          env.method.to_s.upcase, # method
+          env.url.to_s, # url
+          env.request_headers['User-Agent'], # user_agent
+          nil, # client_ip
+          false, # x_forwarded_for
+          false, # traced
         )
       end
     end

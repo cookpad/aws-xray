@@ -28,9 +28,9 @@ module Aws
         @error = nil
       end
 
-      # @param [Hash] env A Rack env
-      def set_http_request(env)
-        @http_request = Request.build_from_rack_env(env)
+      # @param [Aws::Xray::Request] request
+      def set_http_request(request)
+        @http_request = request
       end
 
       # @param [Integer] status HTTP status
