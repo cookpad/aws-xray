@@ -1,3 +1,4 @@
+require 'pry'
 require 'faraday'
 require 'aws-xray'
 

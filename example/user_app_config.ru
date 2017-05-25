@@ -1,3 +1,4 @@
+require 'pry'
 require 'aws-xray'
 
 use Aws::Xray::Rack, name: 'user-app'

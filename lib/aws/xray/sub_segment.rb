@@ -17,8 +17,21 @@ module Aws
         @remote = !!remote
       end
 
+      # Set traced=false if the downstream call is not traced app.
+      # e.g. Third-party Web API call.
+      # http://docs.aws.amazon.com/xray/latest/devguide/xray-api-segmentdocuments.html
+      def set_http_request(env, traced: false)
+        super(env)
+        @http_request.traced = traced
+      end
+
       def to_h
         h = super
+        # x_forwarded_for is Segment only.
+        if h[:http] && h[:http][:request]
+          h[:http][:request].delete(:x_forwarded_for)
+          h[:http][:request][:traced] = @http_request.traced
+        end
         h[:type] = TYPE_NAME
         h[:namespace] = 'remote' if @remote
         h

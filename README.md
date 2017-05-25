@@ -13,10 +13,10 @@ Implemented:
 - Rack middleware.
 - Faraday middleware.
 - Propagatin support limited in single thread environment.
+- Tracing HTTP request/response.
 
 Not yet:
 
-- Tracing HTTP request/response.
 - Multi thread support.
 - Tracing errors.
 
