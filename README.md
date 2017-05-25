@@ -1,8 +1,21 @@
 # Aws::Xray
+The unofficial AWS X-Ray Tracing SDK for Ruby.
+It enables you to capture in-coming HTTP requests and out-going HTTP requests and send them to xray-agent automatically.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/aws/xray`. To experiment with that code, run `bin/console` for an interactive prompt.
+AWS X-Ray is a ditributed tracing system. See more detail about AWS X-Ray at [official document](http://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html).
 
-TODO: Delete this and the text above, and describe your gem
+## Current status
+Implemented:
+
+- Rack middleware.
+- Faraday middleware.
+- Propagatin support limited in single thread environment.
+
+Not yet:
+
+- Tracing HTTP request/response.
+- Multi thread support.
+- Tracing errors.
 
 ## Installation
 
@@ -32,7 +45,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/aws-xray.
+Bug reports and pull requests are welcome on GitHub at https://github.com/taiki45/aws-xray.
 
 ## License
 
