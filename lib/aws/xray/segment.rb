@@ -2,6 +2,7 @@ require 'json'
 require 'securerandom'
 require 'aws/xray/request'
 require 'aws/xray/response'
+require 'aws/xray/error'
 
 module Aws
   module Xray
@@ -39,8 +40,12 @@ module Aws
         @http_response = Response.new(status, length)
       end
 
-      def set_error(e)
-        # TODO: Set error object
+      # @param [Boolean] error Indicating that a client error occurred (response status code was 4XX Client Error).
+      # @param [Boolean] throttle Indicating that a request was throttled (response status code was 429 Too Many Requests).
+      # @param [Boolean] fault Indicating that a server error occurred (response status code was 5XX Server Error).
+      # @param [Exception] e An Exception object
+      def set_error(error: false, throttle: false, fault: false, e: nil, remote: false, cause: nil)
+        @error = Error.new(error, throttle, fault, e, remote, cause)
       end
 
       def finish(now = Time.now)
@@ -72,6 +77,9 @@ module Aws
           h[:in_progress] = true
         else
           h[:end_time] = @end_time
+        end
+        if @error
+          h.merge!(@error.to_h)
         end
         h[:parent_id] = @parent_id if @parent_id
         h

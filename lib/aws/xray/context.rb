@@ -49,7 +49,7 @@ module Aws
         @client.send_segment(@base_segment)
         res
       rescue => e
-        @base_segment.set_error(e)
+        @base_segment.set_error(fault: true, e: e)
         @client.send_segment(@base_segment)
         raise e
       end
@@ -62,7 +62,7 @@ module Aws
         @client.send_segment(sub)
         res
       rescue => e
-        sub.set_error(e)
+        sub.set_error(fault: true, e: e)
         @client.send_segment(sub)
         raise e
       end

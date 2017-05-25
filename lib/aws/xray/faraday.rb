@@ -18,6 +18,16 @@ module Aws
 
           @app.call(req_env).on_complete do |res_env|
             sub.set_http_response(res_env.status, res_env.response_headers['Content-Length'])
+            case res_env.status
+            when 499
+              sub.set_error(error: true, throttle: true)
+            when 400..498
+              sub.set_error(error: true)
+            when 500..599
+              sub.set_error(fault: true, remote: true)
+            else
+              # pass
+            end
           end
         end
       end
