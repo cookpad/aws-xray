@@ -1,6 +1,8 @@
+require 'aws/xray/cause'
+
 module Aws
   module Xray
-    class Error < Struct.new(:error, :throttle, :fault, :e, :remote)
+    class Error < Struct.new(:error, :throttle, :fault, :e, :remote, :cause)
       MAX_BACKTRACE_SIZE = 10
 
       def to_h
@@ -9,8 +11,12 @@ module Aws
           throttle: throttle,
           fault: fault
         }
+        if cause
+          h[:cause] = cause.to_h(remote: remote)
+        end
+        # Overwrite cause because recording exception is more important.
         if e
-          h[:cause] = build_cause(e, remote)
+          h[:cause] = build_cause_from_exception(e, remote)
         end
         h
       end
@@ -19,8 +25,8 @@ module Aws
 
       # TODO: Setting cause API. Downstream API's exception?
       # TODO: paths.
-      def build_cause(e, remote)
-        truncated, stacks = build_stack(e, Dir.pwd + '/')
+      def build_cause_from_exception(e, remote)
+        truncated, stack = build_stack(e, Dir.pwd + '/')
         {
           working_directory: Dir.pwd,
           paths: [],
@@ -32,14 +38,14 @@ module Aws
             truncated: truncated,
             skipped: 0,
             cause: nil,
-            stack: stacks,
+            stack: stack,
           ],
         }
       end
 
       def build_stack(e, dir)
         truncated = [e.backtrace.size - MAX_BACKTRACE_SIZE, 0].max
-        stacks = e.backtrace[0..MAX_BACKTRACE_SIZE - 1].map do |b|
+        stack = e.backtrace[0..MAX_BACKTRACE_SIZE - 1].map do |b|
           file, line, method_name = b.split(':')
           {
             path: file.sub(dir, ''),
@@ -47,7 +53,7 @@ module Aws
             label: method_name,
           }
         end
-        return truncated, stacks
+        return truncated, stack
       end
     end
   end
