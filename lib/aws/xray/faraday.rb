@@ -20,11 +20,14 @@ module Aws
             sub.set_http_response(res_env.status, res_env.response_headers['Content-Length'])
             case res_env.status
             when 499
-              sub.set_error(error: true, throttle: true)
+              cause = Cause.new(stack: caller, message: 'Got 499', type: 'http_request_error')
+              sub.set_error(error: true, throttle: true, cause: cause)
             when 400..498
-              sub.set_error(error: true)
+              cause = Cause.new(stack: caller, message: 'Got 4xx', type: 'http_request_error')
+              sub.set_error(error: true, cause: cause)
             when 500..599
-              sub.set_error(fault: true, remote: true)
+              cause = Cause.new(stack: caller, message: 'Got 5xx', type: 'http_request_error')
+              sub.set_error(fault: true, remote: true, cause: cause)
             else
               # pass
             end
