@@ -8,7 +8,13 @@ module Aws
       TRACE_ENV = 'HTTP_X_AMZN_TRACE_ID'.freeze
 
       # XXX: excluded_paths, included_paths
-      # XXX: document about client_options
+      #
+      # @param [Object] app A Rack app.
+      # @param [String] name Logical service name for this app.
+      # @param [Hash] client_options For xray-agent client.
+      #   - host: e.g. '127.0.0.1'
+      #   - port: e.g. 2000
+      #   - sock: test purpose.
       def initialize(app, name:, client_options: {})
         @app = app
         @name = name

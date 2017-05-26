@@ -44,6 +44,11 @@ module Aws
         @base_segment = Segment.build(@name, trace_header)
       end
 
+      # Rescue standard errors and record the error to the segment.
+      # Then re-raise the error.
+      #
+      # @yield [Aws::Xray::Segment]
+      # @return [Object] A value which given block returns.
       def base_trace
         res = yield @base_segment
         @client.send_segment(@base_segment)
@@ -54,8 +59,13 @@ module Aws
         raise e
       end
 
+      # Rescue standard errors and record the error to the sub segment.
+      # Then re-raise the error.
+      #
       # @param [Boolean] remote
+      # @param [String] name Arbitrary name of the sub segment. e.g. "funccall_f".
       # @yield [Aws::Xray::SubSegment]
+      # @return [Object] A value which given block returns.
       def child_trace(remote:, name:)
         sub = SubSegment.build(@trace_header, @base_segment, remote: remote, name: name)
         res = yield sub

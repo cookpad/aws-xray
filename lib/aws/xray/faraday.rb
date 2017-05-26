@@ -3,6 +3,8 @@ require 'faraday'
 module Aws
   module Xray
     class Faraday < ::Faraday::Middleware
+      # @param [Object] app Faraday app.
+      # @param [String] name Logical service name for downstream API.
       def initialize(app, name = nil)
         super(app)
         @name = name
