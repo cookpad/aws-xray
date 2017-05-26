@@ -13,7 +13,7 @@ RSpec.describe Aws::Xray::Rack do
     let(:app) { ->(_) { [200, {}, ['hello']] } }
 
     it 'calls original app and adds formated trace header value and sends base segment' do
-      stack = described_class.new(app, name: name, client_options: { sock: io }, version: 'deadbeef')
+      stack = described_class.new(app, name: name, client_options: { sock: io })
       status, headers, body = stack.call(env)
 
       expect(status).to eq(200)

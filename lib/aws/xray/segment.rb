@@ -9,20 +9,20 @@ module Aws
     # http://docs.aws.amazon.com/xray/latest/devguide/xray-api-segmentdocuments.html
     class Segment
       class << self
-        def build(name, trace_header, version = nil)
-          new(name: name, trace_id: trace_header.root, parent_id: trace_header.parent, version: version)
+        def build(name, trace_header)
+          new(name: name, trace_id: trace_header.root, parent_id: trace_header.parent)
         end
       end
 
       attr_reader :name, :id, :trace_id, :parent_id
 
       # TODO: securerandom?
-      def initialize(name:, trace_id:, parent_id: nil, version: nil)
+      def initialize(name:, trace_id:, parent_id: nil)
         @name = name
         @id = SecureRandom.hex(8)
         @trace_id = trace_id
         @parent_id = parent_id
-        @version = version
+        @version = Aws::Xray.config.version
         start
         @end_time = nil
         @http_request = nil
