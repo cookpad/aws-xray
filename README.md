@@ -14,11 +14,11 @@ Implemented:
 - Faraday middleware.
 - Propagatin support limited in single thread environment.
 - Tracing HTTP request/response.
+- Tracing errors.
 
 Not yet:
 
 - Multi thread support.
-- Tracing errors.
 
 ## Installation
 
