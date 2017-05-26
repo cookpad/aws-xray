@@ -37,7 +37,7 @@ And then execute:
 ```ruby
 # config.ru
 require 'aws-xray'
-use Aws::Xray::Rack
+use Aws::Xray::Rack, name: 'logical-service-name'
 ```
 
 This allow your app to trace in-coming HTTP requests.
@@ -79,6 +79,16 @@ Aws::Xray::Context.with_new_context('test-app', xray_client, trace_header) do
     end
   end
 end
+```
+
+## Configurations
+### Recording pplication version
+aws-xray automatically tries to set application version by reading `app_root/REVISION` file.
+If you want to set another version, set it with:
+
+```ruby
+# In initialization phase.
+Aws::Xray.config.version = 'deadbeef'
 ```
 
 ## Development

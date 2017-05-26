@@ -10,6 +10,7 @@ RSpec.describe Aws::Xray::Segment do
         name: 'test-app',
         id: /\A[0-9A-Fa-f]{16}\z/,
         trace_id: '1-67891233-abcdef012345678912345678',
+        service: { version: 'deadbeef' },
         start_time: a_kind_of(Float),
         in_progress: true,
         parent_id: 'd5058bbe22392c37',

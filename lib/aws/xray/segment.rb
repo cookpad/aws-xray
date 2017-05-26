@@ -22,6 +22,7 @@ module Aws
         @id = SecureRandom.hex(8)
         @trace_id = trace_id
         @parent_id = parent_id
+        @version = Aws::Xray.config.version
         start
         @end_time = nil
         @http_request = nil
@@ -63,6 +64,9 @@ module Aws
           trace_id: @trace_id,
           start_time: @start_time,
         }
+        if @version
+          h[:service] = { version: @version }
+        end
         if @http_request
           request_hash = @http_request.to_h
           # traced is SubSegment only

@@ -1,11 +1,3 @@
-Embed application version to segment:
-
-```ruby
-use Aws::Xray::Rack, name: 'test-app', version: File.read('REVISION')
-```
-
----
-
 Enbed user information to segment:
 
 ```ruby
@@ -43,5 +35,3 @@ Send in_progress segment.
 `precursor_ids`.
 
 ---
-
-

@@ -11,6 +11,7 @@ RSpec.describe Aws::Xray::SubSegment do
         name: 'funccall_f',
         id: /\A[0-9A-Fa-f]{16}\z/,
         trace_id: '1-67891233-abcdef012345678912345678',
+        service: { version: 'deadbeef' },
         start_time: a_kind_of(Float),
         in_progress: true,
         parent_id: segment.id,

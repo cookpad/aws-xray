@@ -1,24 +1,24 @@
 require 'aws/xray/trace_header'
 require 'aws/xray/client'
 require 'aws/xray/context'
+require 'aws/xray/version_detector'
 
 module Aws
   module Xray
     class Rack
       TRACE_ENV = 'HTTP_X_AMZN_TRACE_ID'.freeze
 
-      # XXX: excluded_paths, included_paths
+      # TODO: excluded_paths, included_paths
       #
-      # @param [Object] app A Rack app.
-      # @param [String] name Logical service name for this app.
-      # @param [Hash] client_options For xray-agent client.
+      # @param [String] name Logical service name.
+      # @param  [Hash] client_options For xray-agent client.
       #   - host: e.g. '127.0.0.1'
       #   - port: e.g. 2000
       #   - sock: test purpose.
-      def initialize(app, name:, client_options: {})
+      def initialize(app, name: nil, client_options: {})
         @app = app
-        @name = name
-        @client = Client.new(client_options)
+        @name = name || Aws::Xray.config.name
+        @client = Client.new(Aws::Xray.config.client_options.merge(client_options))
       end
 
       def call(env)
