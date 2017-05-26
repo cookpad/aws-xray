@@ -82,4 +82,31 @@ RSpec.describe Aws::Xray::Rack do
       expect(Float(body['end_time'])).not_to eq(0)
     end
   end
+
+  describe 'error tracing' do
+    let(:test_error) { Class.new(StandardError) }
+    let(:app) { ->(_) { raise test_error } }
+
+    it 'calls original app and adds formated trace header value and sends base segment' do
+      stack = described_class.new(app, name: name, client_options: { sock: io })
+      expect { stack.call(env) }.to raise_error(test_error)
+
+      io.rewind
+      sent_jsons = io.read.split("\n")
+      expect(sent_jsons.size).to eq(2)
+      _, body_json = *sent_jsons
+
+      body = JSON.parse(body_json)
+      expect(body['name']).to eq(name)
+      expect(body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
+      expect(body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
+      expect(body['parent_id']).to eq('53995c3f42cd8ad8')
+
+      expect(body['error']).to eq(false)
+      expect(body['throttle']).to eq(false)
+      expect(body['fault']).to eq(true)
+      expect(body['cause']).to be_a(Hash)
+      expect(body['cause']).not_to be_empty
+    end
+  end
 end

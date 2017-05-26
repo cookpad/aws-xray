@@ -14,7 +14,7 @@ module Aws
         end
 
         def current
-          Thread.current[VAR_NAME] || raise(NotSetError)
+          Thread.current.thread_variable_get(VAR_NAME) || raise(NotSetError)
         end
 
         def with_new_context(name, client, trace_header)
@@ -27,12 +27,11 @@ module Aws
         private
 
         def build_current(name, client, trace_header)
-          Thread.current[VAR_NAME] = Context.new(name, client, trace_header)
+          Thread.current.thread_variable_set(VAR_NAME, Context.new(name, client, trace_header))
         end
 
-        # XXX: Use delete API if exists
         def remove_current
-          Thread.current[VAR_NAME] = nil
+          Thread.current.thread_variable_set(VAR_NAME, nil)
         end
       end
 
@@ -50,7 +49,7 @@ module Aws
         @client.send_segment(@base_segment)
         res
       rescue => e
-        @base_segment.set_error(e)
+        @base_segment.set_error(fault: true, e: e)
         @client.send_segment(@base_segment)
         raise e
       end
@@ -63,7 +62,7 @@ module Aws
         @client.send_segment(sub)
         res
       rescue => e
-        sub.set_error(e)
+        sub.set_error(fault: true, e: e)
         @client.send_segment(sub)
         raise e
       end

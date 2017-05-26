@@ -88,4 +88,111 @@ RSpec.describe Aws::Xray::Faraday do
       expect(body['name']).to eq('another-name')
     end
   end
+
+  context 'when down-stream returns error' do
+    context '5xx' do
+      let(:stubs) do
+        Faraday::Adapter::Test::Stubs.new do |stub|
+          stub.get('/foo') { |env| [500, {}, 'fault'] }
+        end
+      end
+
+      it 'traces remote fault' do
+        res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace_header) do
+          Aws::Xray::Context.current.base_trace do
+            client.get('/foo')
+          end
+        end
+        expect(res.status).to eq(500)
+
+        io.rewind
+        sent_jsons = io.read.split("\n")
+        _, body_json = sent_jsons[0..1]
+        body = JSON.parse(body_json)
+
+        expect(body['name']).to eq('target-app')
+        expect(body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
+        expect(body['type']).to eq('subsegment')
+        expect(body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
+
+        expect(body['error']).to eq(false)
+        expect(body['throttle']).to eq(false)
+        expect(body['fault']).to eq(true)
+
+        e = body['cause']['exceptions'].first
+        expect(e['id']).to match(/\A[0-9a-fA-F]{16}\z/)
+        expect(e['message']).to eq('Got 5xx')
+        expect(e['remote']).to eq(true)
+        expect(e['stack'].size).to eq(10)
+        expect(e['stack'].first['path']).to end_with('.rb')
+      end
+    end
+
+    context '499' do
+      # TODO
+    end
+
+    context '4xx' do
+      # TODO
+    end
+  end
+
+  context 'when API call raises an error' do
+    let(:stubs) do
+      Faraday::Adapter::Test::Stubs.new do |stub|
+        stub.get('/foo') { |env| raise('test_error') }
+      end
+    end
+
+    it 'traces remote fault' do
+      expect {
+        Aws::Xray::Context.with_new_context('test-app', xray_client, trace_header) do
+          Aws::Xray::Context.current.base_trace do
+            client.get('/foo')
+          end
+        end
+      }.to raise_error('test_error')
+
+      io.rewind
+      sent_jsons = io.read.split("\n")
+      expect(sent_jsons.size).to eq(4)
+      sub_body = JSON.parse(sent_jsons[1])
+
+      expect(sub_body['name']).to eq('target-app')
+      expect(sub_body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
+      expect(sub_body['type']).to eq('subsegment')
+      expect(sub_body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
+
+      expect(sub_body['error']).to eq(false)
+      expect(sub_body['throttle']).to eq(false)
+      expect(sub_body['fault']).to eq(true)
+
+      e = sub_body['cause']['exceptions'].first
+      expect(e['id']).to match(/\A[0-9a-fA-F]{16}\z/)
+      expect(e['message']).to eq('test_error')
+      expect(e['type']).to eq('RuntimeError')
+      expect(e['remote']).to eq(false)
+      expect(e['stack'].size).to eq(10)
+      expect(e['stack'].first['path']).to end_with('.rb')
+
+      body = JSON.parse(sent_jsons[3])
+
+      expect(body['name']).to eq('test-app')
+      expect(body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
+      expect(body).not_to have_key('type')
+      expect(body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
+
+      expect(body['error']).to eq(false)
+      expect(body['throttle']).to eq(false)
+      expect(body['fault']).to eq(true)
+
+      e = body['cause']['exceptions'].first
+      expect(e['id']).to match(/\A[0-9a-fA-F]{16}\z/)
+      expect(e['message']).to eq('test_error')
+      expect(e['type']).to eq('RuntimeError')
+      expect(e['remote']).to eq(false)
+      expect(e['stack'].size).to eq(10)
+      expect(e['stack'].first['path']).to end_with('.rb')
+    end
+  end
 end
