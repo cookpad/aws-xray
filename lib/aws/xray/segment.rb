@@ -9,19 +9,20 @@ module Aws
     # http://docs.aws.amazon.com/xray/latest/devguide/xray-api-segmentdocuments.html
     class Segment
       class << self
-        def build(name, trace_header)
-          new(name: name, trace_id: trace_header.root, parent_id: trace_header.parent)
+        def build(name, trace_header, version = nil)
+          new(name: name, trace_id: trace_header.root, parent_id: trace_header.parent, version: version)
         end
       end
 
       attr_reader :name, :id, :trace_id, :parent_id
 
       # TODO: securerandom?
-      def initialize(name:, trace_id:, parent_id: nil)
+      def initialize(name:, trace_id:, parent_id: nil, version: nil)
         @name = name
         @id = SecureRandom.hex(8)
         @trace_id = trace_id
         @parent_id = parent_id
+        @version = version
         start
         @end_time = nil
         @http_request = nil
@@ -63,6 +64,9 @@ module Aws
           trace_id: @trace_id,
           start_time: @start_time,
         }
+        if @version
+          h[:service] = { version: @version }
+        end
         if @http_request
           request_hash = @http_request.to_h
           # traced is SubSegment only

@@ -17,8 +17,8 @@ module Aws
           Thread.current.thread_variable_get(VAR_NAME) || raise(NotSetError)
         end
 
-        def with_new_context(name, client, trace_header)
-          build_current(name, client, trace_header)
+        def with_new_context(name, client, trace_header, version = nil)
+          build_current(name, client, trace_header, version)
           yield
         ensure
           remove_current
@@ -26,8 +26,8 @@ module Aws
 
         private
 
-        def build_current(name, client, trace_header)
-          Thread.current.thread_variable_set(VAR_NAME, Context.new(name, client, trace_header))
+        def build_current(name, client, trace_header, version)
+          Thread.current.thread_variable_set(VAR_NAME, Context.new(name, client, trace_header, version))
         end
 
         def remove_current
@@ -37,11 +37,11 @@ module Aws
 
       attr_reader :name
 
-      def initialize(name, client, trace_header)
+      def initialize(name, client, trace_header, version = nil)
         @name = name
         @client = client
         @trace_header = trace_header
-        @base_segment = Segment.build(@name, trace_header)
+        @base_segment = Segment.build(@name, trace_header, version)
       end
 
       # Rescue standard errors and record the error to the segment.

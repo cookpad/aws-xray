@@ -13,7 +13,7 @@ RSpec.describe Aws::Xray::Rack do
     let(:app) { ->(_) { [200, {}, ['hello']] } }
 
     it 'calls original app and adds formated trace header value and sends base segment' do
-      stack = described_class.new(app, name: name, client_options: { sock: io })
+      stack = described_class.new(app, name: name, client_options: { sock: io }, version: 'deadbeef')
       status, headers, body = stack.call(env)
 
       expect(status).to eq(200)
@@ -32,6 +32,7 @@ RSpec.describe Aws::Xray::Rack do
       expect(body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
       expect(body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
       expect(body['parent_id']).to eq('53995c3f42cd8ad8')
+      expect(body['service']['version']).to eq('deadbeef')
       # Test they are valid float value and are not 0.
       expect(Float(body['start_time'])).not_to eq(0)
       expect(Float(body['end_time'])).not_to eq(0)

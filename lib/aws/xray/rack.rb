@@ -1,6 +1,7 @@
 require 'aws/xray/trace_header'
 require 'aws/xray/client'
 require 'aws/xray/context'
+require 'aws/xray/version_detector'
 
 module Aws
   module Xray
@@ -15,10 +16,13 @@ module Aws
       #   - host: e.g. '127.0.0.1'
       #   - port: e.g. 2000
       #   - sock: test purpose.
-      def initialize(app, name:, client_options: {})
+      # @param [String,Proc] version A String or callable object which returns application version.
+      #   Default version detection tries to solve with `app_root/REVISION` file.
+      def initialize(app, name:, client_options: {}, version: VersionDetector.new)
         @app = app
         @name = name
         @client = Client.new(client_options)
+        @version = version.respond_to?(:call) ? version.call : version
       end
 
       def call(env)
@@ -29,7 +33,7 @@ module Aws
                          TraceHeader.generate
                        end
 
-        Context.with_new_context(@name, @client, trace_header) do
+        Context.with_new_context(@name, @client, trace_header, @version) do
           Context.current.base_trace do |seg|
             seg.set_http_request(Request.build_from_rack_env(env))
             status, headers, body = @app.call(env)
