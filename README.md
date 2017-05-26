@@ -84,10 +84,11 @@ end
 ## Configurations
 ### Recording pplication version
 aws-xray automatically tries to set application version by reading `app_root/REVISION` file.
-If you want to set another version, use `version` parameter.
+If you want to set another version, set it with:
 
 ```ruby
-use Aws::Xray::Rack, name: 'xxx', version: 'deadbeef'
+# In initialization phase.
+Aws::Xray.config.version = 'deadbeef'
 ```
 
 ## Development
