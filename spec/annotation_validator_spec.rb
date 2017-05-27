@@ -10,7 +10,7 @@ RSpec.describe Aws::Xray::AnnotationValidator do
   end
 
   context 'when keys are ng' do
-    let(:h) { { "zip-code": 98101, internal: false } }
+    let(:h) { { :"zip-code" => 98101, internal: false } }
 
     it 'raises' do
       expect { described_class.call(h) }.to raise_error(RuntimeError)
@@ -18,7 +18,7 @@ RSpec.describe Aws::Xray::AnnotationValidator do
   end
 
   context 'when keys are ng' do
-    let(:h) { { "zipcode?": 98101, internal: false } }
+    let(:h) { { :"zipcode?" => 98101, internal: false } }
 
     it 'raises' do
       expect { described_class.call(h) }.to raise_error(RuntimeError)
