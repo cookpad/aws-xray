@@ -34,6 +34,7 @@ RSpec.describe Aws::Xray::Rack do
       expect(body['parent_id']).to eq('53995c3f42cd8ad8')
       expect(body['service']['version']).to eq('deadbeef')
       expect(body['annotation']['hostname']).not_to be_empty
+      expect(body['metadata']['tracing_sdk']['name']).to eq('aws-xray')
       # Test they are valid float value and are not 0.
       expect(Float(body['start_time'])).not_to eq(0)
       expect(Float(body['end_time'])).not_to eq(0)

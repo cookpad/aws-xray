@@ -13,7 +13,7 @@ AWS X-Ray is a ditributed tracing system. See more detail about AWS X-Ray at [of
 - Propagatin support limited in single thread environment.
 - Tracing HTTP request/response.
 - Tracing errors.
-- Annotation support.
+- Annotation and metadata support.
 
 ## Installation
 

@@ -12,6 +12,7 @@ RSpec.describe Aws::Xray::Segment do
         trace_id: '1-67891233-abcdef012345678912345678',
         service: { version: 'deadbeef' },
         annotation: a_kind_of(Hash),
+        metadata: a_kind_of(Hash),
         start_time: a_kind_of(Float),
         in_progress: true,
         parent_id: 'd5058bbe22392c37',
