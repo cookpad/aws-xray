@@ -28,6 +28,10 @@ And then execute:
     $ bundle
 
 ## Usage
+### Rails app
+aws-xray's Rails integration automatically inserts `Aws::Xray::Rack` middleware to your middleware stack.
+To trace out-going HTTP requests, see below.
+
 ### Rack app
 ```ruby
 # config.ru
@@ -85,6 +89,25 @@ If you want to set another version, set it with:
 # In initialization phase.
 Aws::Xray.config.version = 'deadbeef'
 ```
+
+### Default annotation and metadata
+aws-xray records hostname by default.
+
+If you want to record specific annotation in all of your segments, configure like:
+
+```ruby
+Aws::Xray.config.default_annotation = Aws::Xray.config.default_annotation.merge(key: 'value')
+```
+
+Keys must be alphanumeric characters with underscore and values must be one of String or Integer or Boolean values.
+
+For meta data:
+
+```ruby
+Aws::Xray.config.default_metadata = Aws::Xray.config.default_metadata.merge(key: ['some', 'meaningful', 'value'])
+```
+
+Note: See official document to know what annotation and metadata are in AWS X-Ray.
 
 ## Development
 

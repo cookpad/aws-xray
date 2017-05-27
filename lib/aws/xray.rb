@@ -13,3 +13,5 @@ module Aws
     end
   end
 end
+
+require 'aws/xray/rails' if defined?(Rails)
