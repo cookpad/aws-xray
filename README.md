@@ -88,13 +88,11 @@ client = Faraday.new('...') do |builder|
 end
 
 # Start new tracing context then perform arbitrary actions in the block.
-Aws::Xray::Context.with_new_context('test-app', xray_client, trace_header) do
-  Aws::Xray::Context.current.base_trace do
-    client.get('/foo')
+Aws::Xray.trace do |seg|
+  client.get('/foo')
 
-    Aws::Xray::Context.current.child_trace do |sub|
-      # DB access or something to trace.
-    end
+  Aws::Xray::Context.current.child_trace do |sub|
+    # DB access or something to trace.
   end
 end
 ```

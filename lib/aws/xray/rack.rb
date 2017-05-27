@@ -8,12 +8,6 @@ module Aws
     class Rack
       TRACE_ENV = 'HTTP_X_AMZN_TRACE_ID'.freeze
 
-      class MissingNameError < ::StandardError
-        def initialize
-          super("`name` is empty. Configure this with `Aws::Xray.config.name = 'my-app'`.")
-        end
-      end
-
       # TODO: excluded_paths, included_paths
       #
       # @param  [Hash] client_options For xray-agent client.
