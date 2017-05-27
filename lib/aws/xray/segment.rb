@@ -3,6 +3,7 @@ require 'securerandom'
 require 'aws/xray/request'
 require 'aws/xray/response'
 require 'aws/xray/error'
+require 'aws/xray/annotation_validator'
 
 module Aws
   module Xray
@@ -28,6 +29,7 @@ module Aws
         @http_request = nil
         @http_response = nil
         @error = nil
+        @annotation = Aws::Xray.config.default_annotation
       end
 
       # @param [Aws::Xray::Request] request
@@ -49,6 +51,13 @@ module Aws
         @error = Error.new(error, throttle, fault, e, remote, cause)
       end
 
+      # @param [Hash] h Annotation Hash. Keys must consist of only alphabets and underscore.
+      #   Values must be one of String or Integer or Boolean values.
+      def set_annotation(annotation)
+        AnnotationValidator.call(h)
+        @annotation = @annotation.merge(annotation)
+      end
+
       def finish(now = Time.now)
         @end_time = now.to_f
       end
@@ -66,6 +75,9 @@ module Aws
         }
         if @version
           h[:service] = { version: @version }
+        end
+        if @annotation
+          h[:annotation] = @annotation
         end
         if @http_request
           request_hash = @http_request.to_h

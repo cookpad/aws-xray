@@ -1,3 +1,6 @@
+require 'socket'
+require 'aws/xray/annotation_validator'
+
 module Aws
   module Xray
     # thread-unsafe, suppose to be used only in initialization phase.
@@ -22,6 +25,19 @@ module Aws
       #   Default version detection tries to solve with `app_root/REVISION` file.
       def version=(v)
         @version = v.respond_to?(:call) ? v.call : v
+      end
+
+      DEFAULT_ANNOTATION = {
+        hostname: Socket.gethostname,
+      }
+      # @return [Hash] default annotation with key-value format.
+      def default_annotation
+        @default_annotation ||= DEFAULT_ANNOTATION
+      end
+      # @param [Hash] h default annotation Hash.
+      def default_annotation=(annotation)
+        AnnotationValidator.call(annotation)
+        @default_annotation = annotation
       end
     end
   end
