@@ -37,14 +37,12 @@ Aws::Xray.config.name = 'my-app'
 Rails.application.config.middleware.use Aws::Xray::Rack
 ```
 
-Or just require `aws/xray/rails`:
+Or just require `aws/xray/rails`. It uses your application name by default.
+e.g. `Legacy::MyBlog` -> `legacy-my-blog`.
 
 ```ruby
 # Gemfile
 gem 'aws-xray', require: 'aws/xray/rails'
-
-# config/initializers/aws_xray.rb
-Aws::Xray.config.name = 'my-app'
 ```
 
 To trace out-going HTTP requests, see below.
