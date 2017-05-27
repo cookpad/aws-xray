@@ -14,10 +14,6 @@ class Rack
 
 ---
 
-Metadata.
-
----
-
 `aws` field. Especially EC2 and ECS field.
 
 ---
@@ -27,5 +23,3 @@ Send in_progress segment.
 ---
 
 `precursor_ids`.
-
----
