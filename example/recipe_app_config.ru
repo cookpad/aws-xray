@@ -5,7 +5,8 @@ require 'aws-xray'
 user_app = ENV.fetch('USER_APP') # host:port
 campain_app = ENV.fetch('CAMPAIN_APP') # host:port
 
-use Aws::Xray::Rack, name: 'recipe-app'
+Aws::Xray.config.name = 'recipe-app'
+use Aws::Xray::Rack
 
 run Proc.new {|env|
   user_client = Faraday.new(url: "http://#{user_app}/", headers: { 'Host' => 'user-app' }) do |builder|

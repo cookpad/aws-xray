@@ -4,7 +4,8 @@ require 'aws-xray'
 
 recipe_app = ENV.fetch('RECIPE_APP') # host:port
 
-use Aws::Xray::Rack, name: 'front-app'
+Aws::Xray.config.name = 'front-app'
+use Aws::Xray::Rack
 
 run Proc.new {|env|
   headers = { 'Host' => 'recipe-app' }

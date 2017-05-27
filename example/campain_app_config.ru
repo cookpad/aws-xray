@@ -1,7 +1,8 @@
 require 'pry'
 require 'aws-xray'
 
-use Aws::Xray::Rack, name: 'campain-app'
+Aws::Xray.config.name = 'campain-app'
+use Aws::Xray::Rack
 
 class DbConnectionError < StandardError
   def initialize
