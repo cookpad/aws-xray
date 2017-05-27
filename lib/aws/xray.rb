@@ -2,6 +2,7 @@ require 'aws/xray/version'
 require 'aws/xray/rack'
 require 'aws/xray/faraday'
 require 'aws/xray/configuration'
+require 'aws/xray/test_socket'
 
 module Aws
   module Xray

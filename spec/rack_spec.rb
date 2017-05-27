@@ -2,11 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Aws::Xray::Rack do
   let(:env) { { 'HTTP_X_AMZN_TRACE_ID' => 'Root=1-67891233-abcdef012345678912345678;Parent=53995c3f42cd8ad8' } }
-  let(:io) do
-    a = StringIO.new
-    def a.send(body, *); write(body); end
-    a
-  end
+  let(:io) { Aws::Xray::TestSocket.new }
 
   describe 'base tracing' do
     let(:app) { ->(_) { [200, {}, ['hello']] } }

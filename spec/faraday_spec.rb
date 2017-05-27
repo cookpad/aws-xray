@@ -14,11 +14,7 @@ RSpec.describe Aws::Xray::Faraday do
   end
   let(:headers) { { 'Host' => 'target-app' } }
   let(:xray_client) { Aws::Xray::Client.new(sock: io) }
-  let(:io) do
-    a = StringIO.new
-    def a.send(body, *); write(body); end
-    a
-  end
+  let(:io) { Aws::Xray::TestSocket.new }
   let(:trace) { Aws::Xray::Trace.new(root: '1-67891233-abcdef012345678912345678') }
 
   context 'without name option' do
