@@ -2,7 +2,6 @@ require 'spec_helper'
 
 RSpec.describe Aws::Xray::Rack do
   let(:env) { { 'HTTP_X_AMZN_TRACE_ID' => 'Root=1-67891233-abcdef012345678912345678;Parent=53995c3f42cd8ad8' } }
-  let(:name) { 'test-app' }
   let(:io) do
     a = StringIO.new
     def a.send(body, *); write(body); end
@@ -13,7 +12,7 @@ RSpec.describe Aws::Xray::Rack do
     let(:app) { ->(_) { [200, {}, ['hello']] } }
 
     it 'calls original app and adds formated trace header value and sends base segment' do
-      stack = described_class.new(app, name: name, client_options: { sock: io })
+      stack = described_class.new(app, client_options: { sock: io })
       status, headers, body = stack.call(env)
 
       expect(status).to eq(200)
@@ -28,7 +27,7 @@ RSpec.describe Aws::Xray::Rack do
       expect(JSON.parse(header_json)).to eq("format" => "json", "version" => 1)
 
       body = JSON.parse(body_json)
-      expect(body['name']).to eq(name)
+      expect(body['name']).to eq('test-app')
       expect(body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
       expect(body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
       expect(body['parent_id']).to eq('53995c3f42cd8ad8')
@@ -59,7 +58,7 @@ RSpec.describe Aws::Xray::Rack do
     end
 
     it 'sends both base segment and sub segment' do
-      stack = described_class.new(app, name: name, client_options: { sock: io })
+      stack = described_class.new(app, client_options: { sock: io })
       status, headers, body = stack.call(env)
 
       expect(status).to eq(200)
@@ -91,7 +90,7 @@ RSpec.describe Aws::Xray::Rack do
     let(:app) { ->(_) { raise test_error } }
 
     it 'calls original app and adds formated trace header value and sends base segment' do
-      stack = described_class.new(app, name: name, client_options: { sock: io })
+      stack = described_class.new(app, client_options: { sock: io })
       expect { stack.call(env) }.to raise_error(test_error)
 
       io.rewind
@@ -100,7 +99,7 @@ RSpec.describe Aws::Xray::Rack do
       _, body_json = *sent_jsons
 
       body = JSON.parse(body_json)
-      expect(body['name']).to eq(name)
+      expect(body['name']).to eq('test-app')
       expect(body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
       expect(body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
       expect(body['parent_id']).to eq('53995c3f42cd8ad8')

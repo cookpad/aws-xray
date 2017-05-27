@@ -16,14 +16,13 @@ module Aws
 
       # TODO: excluded_paths, included_paths
       #
-      # @param [String] name Logical service name.
       # @param  [Hash] client_options For xray-agent client.
       #   - host: e.g. '127.0.0.1'
       #   - port: e.g. 2000
       #   - sock: test purpose.
-      def initialize(app, name: nil, client_options: {})
+      def initialize(app, client_options: {})
         @app = app
-        @name = name || Aws::Xray.config.name || raise(MissingNameError)
+        @name = Aws::Xray.config.name || raise(MissingNameError)
         @client = Client.new(Aws::Xray.config.client_options.merge(client_options))
       end
 
