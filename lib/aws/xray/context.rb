@@ -17,8 +17,8 @@ module Aws
           Thread.current.thread_variable_get(VAR_NAME) || raise(NotSetError)
         end
 
-        def with_new_context(name, client, trace_header)
-          build_current(name, client, trace_header)
+        def with_new_context(name, client, trace)
+          build_current(name, client, trace)
           yield
         ensure
           remove_current
@@ -26,8 +26,8 @@ module Aws
 
         private
 
-        def build_current(name, client, trace_header)
-          Thread.current.thread_variable_set(VAR_NAME, Context.new(name, client, trace_header))
+        def build_current(name, client, trace)
+          Thread.current.thread_variable_set(VAR_NAME, Context.new(name, client, trace))
         end
 
         def remove_current
@@ -37,11 +37,11 @@ module Aws
 
       attr_reader :name
 
-      def initialize(name, client, trace_header)
+      def initialize(name, client, trace)
         @name = name
         @client = client
-        @trace_header = trace_header
-        @base_segment = Segment.build(@name, trace_header)
+        @trace = trace
+        @base_segment = Segment.build(@name, trace)
       end
 
       # Rescue standard errors and record the error to the segment.
@@ -67,7 +67,7 @@ module Aws
       # @yield [Aws::Xray::SubSegment]
       # @return [Object] A value which given block returns.
       def child_trace(remote:, name:)
-        sub = SubSegment.build(@trace_header, @base_segment, remote: remote, name: name)
+        sub = SubSegment.build(@trace, @base_segment, remote: remote, name: name)
         res = yield sub
         @client.send_segment(sub)
         res

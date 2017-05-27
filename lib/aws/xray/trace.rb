@@ -3,7 +3,7 @@ require 'securerandom'
 
 module Aws
   module Xray
-    class TraceHeader
+    class Trace
       class << self
         def generate(now = Time.now)
           new(root: generate_root(now))

@@ -1,4 +1,4 @@
-require 'aws/xray/trace_header'
+require 'aws/xray/trace'
 require 'aws/xray/client'
 require 'aws/xray/context'
 require 'aws/xray/version_detector'
@@ -22,18 +22,18 @@ module Aws
 
       def call(env)
         header_value = env[TRACE_ENV]
-        trace_header = if header_value
-                         TraceHeader.build_from_header_value(header_value)
+        trace = if header_value
+                         Trace.build_from_header_value(header_value)
                        else
-                         TraceHeader.generate
+                         Trace.generate
                        end
 
-        Context.with_new_context(@name, @client, trace_header) do
+        Context.with_new_context(@name, @client, trace) do
           Context.current.base_trace do |seg|
             seg.set_http_request(Request.build_from_rack_env(env))
             status, headers, body = @app.call(env)
             seg.set_http_response(status, headers['Content-Length'])
-            headers[TRACE_HEADER] = trace_header.to_header_value
+            headers[TRACE_HEADER] = trace.to_header_value
             [status, headers, body]
           end
         end

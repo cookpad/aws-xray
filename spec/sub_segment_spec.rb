@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 RSpec.describe Aws::Xray::SubSegment do
-  let(:trace_header) { Aws::Xray::TraceHeader.new(root: '1-67891233-abcdef012345678912345678', parent: 'd5058bbe22392c37') }
-  let(:segment) { Aws::Xray::Segment.build('test-app', trace_header) }
+  let(:trace) { Aws::Xray::Trace.new(root: '1-67891233-abcdef012345678912345678', parent: 'd5058bbe22392c37') }
+  let(:segment) { Aws::Xray::Segment.build('test-app', trace) }
 
   describe 'serialization' do
     it 'serialized properly' do
-      sub = described_class.build(trace_header, segment, remote: true, name: 'funccall_f')
+      sub = described_class.build(trace, segment, remote: true, name: 'funccall_f')
       expect(sub.to_h).to match(
         name: 'funccall_f',
         id: /\A[0-9A-Fa-f]{16}\z/,
@@ -26,12 +26,12 @@ RSpec.describe Aws::Xray::SubSegment do
     end
   end
 
-  describe '#generate_trace_header' do
-    it 'returns copied trace_header' do
-      sub = described_class.build(trace_header, segment, remote: true, name: 'funccall_f')
-      new_trace_header = sub.generate_trace_header
-      expect(new_trace_header.root).to eq('1-67891233-abcdef012345678912345678')
-      expect(new_trace_header.parent).to eq(sub.id)
+  describe '#generate_trace' do
+    it 'returns copied trace' do
+      sub = described_class.build(trace, segment, remote: true, name: 'funccall_f')
+      new_trace = sub.generate_trace
+      expect(new_trace.root).to eq('1-67891233-abcdef012345678912345678')
+      expect(new_trace.parent).to eq(sub.id)
     end
   end
 end

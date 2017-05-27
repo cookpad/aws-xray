@@ -10,8 +10,8 @@ module Aws
     # http://docs.aws.amazon.com/xray/latest/devguide/xray-api-segmentdocuments.html
     class Segment
       class << self
-        def build(name, trace_header)
-          new(name: name, trace_id: trace_header.root, parent_id: trace_header.parent)
+        def build(name, trace)
+          new(name: name, trace_id: trace.root, parent_id: trace.parent)
         end
       end
 

@@ -5,15 +5,15 @@ module Aws
     # http://docs.aws.amazon.com/xray/latest/devguide/xray-api-segmentdocuments.html
     class SubSegment < Segment
       # @param [Boolean] remote
-      def self.build(trace_header, parent, remote:, name:)
-        new(name: name, trace_header: trace_header, parent_id: parent.id, remote: remote)
+      def self.build(trace, parent, remote:, name:)
+        new(name: name, trace: trace, parent_id: parent.id, remote: remote)
       end
 
       TYPE_NAME = 'subsegment'.freeze
 
-      def initialize(name:, trace_header:, parent_id:, remote:)
-        super(name: name, trace_id: trace_header.root, parent_id: parent_id)
-        @trace_header = trace_header
+      def initialize(name:, trace:, parent_id:, remote:)
+        super(name: name, trace_id: trace.root, parent_id: parent_id)
+        @trace = trace
         @remote = !!remote
       end
 
@@ -37,8 +37,8 @@ module Aws
         h
       end
 
-      def generate_trace_header
-        @trace_header.copy(parent: @id)
+      def generate_trace
+        @trace.copy(parent: @id)
       end
     end
   end

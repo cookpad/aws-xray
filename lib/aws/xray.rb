@@ -22,7 +22,7 @@ module Aws
     def self.trace(name: nil)
       name = name || config.name || raise(MissingNameError)
       client = Client.new(Aws::Xray.config.client_options)
-      Context.with_new_context(name, client, TraceHeader.generate) do
+      Context.with_new_context(name, client, Trace.generate) do
         Context.current.base_trace do |seg|
           yield seg
         end
