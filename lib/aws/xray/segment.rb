@@ -30,6 +30,7 @@ module Aws
         @http_response = nil
         @error = nil
         @annotation = Aws::Xray.config.default_annotation
+        @metadata = Aws::Xray.config.default_metadata
       end
 
       # @param [Aws::Xray::Request] request
@@ -51,11 +52,16 @@ module Aws
         @error = Error.new(error, throttle, fault, e, remote, cause)
       end
 
-      # @param [Hash] h Annotation Hash. Keys must consist of only alphabets and underscore.
+      # @param [Hash] annotation Keys must consist of only alphabets and underscore.
       #   Values must be one of String or Integer or Boolean values.
       def set_annotation(annotation)
         AnnotationValidator.call(h)
         @annotation = @annotation.merge(annotation)
+      end
+
+      # @param [Hash] metadata
+      def set_metadata(metadata)
+        @metadata = @metadata.merge(metadata)
       end
 
       def finish(now = Time.now)
@@ -72,12 +78,11 @@ module Aws
           id: @id,
           trace_id: @trace_id,
           start_time: @start_time,
+          annotation: @annotation,
+          metadata: @metadata,
         }
         if @version
           h[:service] = { version: @version }
-        end
-        if @annotation
-          h[:annotation] = @annotation
         end
         if @http_request
           request_hash = @http_request.to_h

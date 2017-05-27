@@ -39,6 +39,19 @@ module Aws
         AnnotationValidator.call(annotation)
         @default_annotation = annotation
       end
+
+      DEFAULT_METADATA = {
+        tracing_sdk: {
+          name: 'aws-xray',
+          version: Aws::Xray::VERSION,
+        }
+      }.freeze
+      # @return [Hash] Default metadata.
+      def default_metadata
+        @default_metadata ||= DEFAULT_METADATA
+      end
+      # @param [Hash] metadata Default metadata.
+      attr_writer :default_metadata
     end
   end
 end
