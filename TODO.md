@@ -14,12 +14,6 @@ class Rack
 
 ---
 
-Annotation.
-
-Default annotation configuration API. Embed host name or something.
-
----
-
 Metadata.
 
 ---

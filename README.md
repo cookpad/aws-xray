@@ -7,18 +7,13 @@ It enables you to capture in-coming HTTP requests and out-going HTTP requests an
 
 AWS X-Ray is a ditributed tracing system. See more detail about AWS X-Ray at [official document](http://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html).
 
-## Current status
-Implemented:
-
+## Features
 - Rack middleware.
 - Faraday middleware.
 - Propagatin support limited in single thread environment.
 - Tracing HTTP request/response.
 - Tracing errors.
-
-Not yet:
-
-- Multi thread support.
+- Annotation support.
 
 ## Installation
 
