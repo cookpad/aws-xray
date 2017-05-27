@@ -8,6 +8,12 @@ module Aws
     class Rack
       TRACE_ENV = 'HTTP_X_AMZN_TRACE_ID'.freeze
 
+      class MissingNameError < ::StandardError
+        def initialize
+          super("`name` is empty. Configure this with `Aws::Xray.config.name = 'my-app'`.")
+        end
+      end
+
       # TODO: excluded_paths, included_paths
       #
       # @param [String] name Logical service name.
@@ -17,7 +23,7 @@ module Aws
       #   - sock: test purpose.
       def initialize(app, name: nil, client_options: {})
         @app = app
-        @name = name || Aws::Xray.config.name
+        @name = name || Aws::Xray.config.name || raise(MissingNameError)
         @client = Client.new(Aws::Xray.config.client_options.merge(client_options))
       end
 
