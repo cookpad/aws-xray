@@ -16,7 +16,7 @@ RSpec.describe Aws::Xray::Faraday do
   let(:xray_client) { Aws::Xray::Client.new(sock: io) }
   let(:io) do
     a = StringIO.new
-    def a.send(body, _); write(body); end
+    def a.send(body, *); write(body); end
     a
   end
   let(:trace_header) { Aws::Xray::TraceHeader.new(root: '1-67891233-abcdef012345678912345678') }

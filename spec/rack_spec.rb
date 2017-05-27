@@ -5,7 +5,7 @@ RSpec.describe Aws::Xray::Rack do
   let(:name) { 'test-app' }
   let(:io) do
     a = StringIO.new
-    def a.send(body, _); write(body); end
+    def a.send(body, *); write(body); end
     a
   end
 
