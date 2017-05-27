@@ -13,10 +13,20 @@ module Aws
           end
         end
 
+        # @return [Aws::Xray::Context]
         def current
           Thread.current.thread_variable_get(VAR_NAME) || raise(NotSetError)
         end
 
+        # @param [String] name logical name of this tracing context.
+        # @param [Aws::Xray::Client] client Require this parameter because the
+        #   socket inside client can live longer than this context. For example
+        #   the life-cycle of context is HTTP request based but the socket can
+        #   live over HTTP requests cycle, it is opened when application starts
+        #   then is closed when application exits.
+        # @param [Aws::Xray::Trace] trace newly generated trace or created with
+        #   HTTP request header.
+        # @yield [Aws::Xray::Context] newly created context.
         def with_new_context(name, client, trace)
           build_current(name, client, trace)
           yield

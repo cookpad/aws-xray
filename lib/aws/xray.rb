@@ -18,7 +18,7 @@ module Aws
       attr_reader :config
     end
 
-    # @param [String] name a logical name of this application.
+    # @param [String] name a logical name of this tracing context.
     def self.trace(name: nil)
       name = name || config.name || raise(MissingNameError)
       client = Client.new(Aws::Xray.config.client_options)
