@@ -29,7 +29,7 @@ module Aws
 
       DEFAULT_ANNOTATION = {
         hostname: Socket.gethostname,
-      }
+      }.freeze
       # @return [Hash] default annotation with key-value format.
       def default_annotation
         @default_annotation ||= DEFAULT_ANNOTATION
