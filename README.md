@@ -28,11 +28,33 @@ And then execute:
     $ bundle
 
 ## Usage
+### Rails app
+Insert Rack middleware by yourself:
+
+```
+# config/initializers/aws_xray.rb
+Aws::Xray.config.name = 'my-app'
+Rails.application.config.middleware.use Aws::Xray::Rack
+```
+
+Or just require `aws/xray/rails`:
+
+```ruby
+# Gemfile
+gem 'aws-xray', require: 'aws/xray/rails'
+
+# config/initializers/aws_xray.rb
+Aws::Xray.config.name = 'my-app'
+```
+
+To trace out-going HTTP requests, see below.
+
 ### Rack app
 ```ruby
 # config.ru
 require 'aws-xray'
-use Aws::Xray::Rack, name: 'logical-service-name'
+Aws::Xray.config.name = 'my-app'
+use Aws::Xray::Rack
 ```
 
 This allow your app to trace in-coming HTTP requests.
@@ -57,6 +79,9 @@ end
 
 ### non-Rack app (like background jobs)
 ```ruby
+require 'aws-xray'
+Aws::Xray.config.name = 'my-app'
+
 # Build HTTP client with Faraday builder.
 # You can set the down stream app id to Host header as well.
 client = Faraday.new('...') do |builder|
@@ -85,6 +110,25 @@ If you want to set another version, set it with:
 # In initialization phase.
 Aws::Xray.config.version = 'deadbeef'
 ```
+
+### Default annotation and metadata
+aws-xray records hostname by default.
+
+If you want to record specific annotation in all of your segments, configure like:
+
+```ruby
+Aws::Xray.config.default_annotation = Aws::Xray.config.default_annotation.merge(key: 'value')
+```
+
+Keys must be alphanumeric characters with underscore and values must be one of String or Integer or Boolean values.
+
+For meta data:
+
+```ruby
+Aws::Xray.config.default_metadata = Aws::Xray.config.default_metadata.merge(key: ['some', 'meaningful', 'value'])
+```
+
+Note: See official document to know what annotation and metadata are in AWS X-Ray.
 
 ## Development
 
