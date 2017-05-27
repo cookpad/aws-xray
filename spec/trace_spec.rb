@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'time'
 
-RSpec.describe Aws::Xray::TraceHeader do
+RSpec.describe Aws::Xray::Trace do
   context 'with parent and sampled' do
     let(:v) { 'Root=1-5759e988-bd862e3fe1be46a994272793;Parent=53995c3f42cd8ad8;Sampled=1' }
 

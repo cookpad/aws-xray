@@ -21,6 +21,10 @@ module Aws
           $stderr.puts("Can not send all bytes: #{len} sent")
         end
       end
+
+      def close
+        @sock.close
+      end
     end
   end
 end
