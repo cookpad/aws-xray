@@ -12,6 +12,9 @@ module Aws
       name_option = ENV['AWS_XRAY_NAME']
       DEFAULT_NAME = name_option ? name_option : nil
 
+      path_option = ENV['AWS_XRAY_EXCLUDED_PATHS']
+      DEFAULT_EXCLUDED_PATHS = path_option ? path_option.split(',') : []
+
       # @return [String] name Logical service name for this application.
       def name
         @name ||= DEFAULT_NAME
@@ -26,6 +29,12 @@ module Aws
         @client_options ||= { host: DEFAULT_HOST, port: DEFAULT_PORT }
       end
       attr_writer :client_options
+
+      # @return [Array<String>]
+      def excluded_paths
+        @excluded_paths ||= DEFAULT_EXCLUDED_PATHS
+      end
+      attr_writer :excluded_paths
 
       # @return [String]
       def version

@@ -17,7 +17,7 @@ module Aws
         @app = app
         @name = Aws::Xray.config.name || raise(MissingNameError)
         @client = Client.new(Aws::Xray.config.client_options.merge(client_options))
-        @excluded_paths = excluded_paths
+        @excluded_paths = excluded_paths + Aws::Xray.config.excluded_paths
       end
 
       def call(env)
