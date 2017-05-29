@@ -9,8 +9,14 @@ module Aws
       DEFAULT_HOST = option ? option.split(':').first : 'localhost'
       DEFAULT_PORT = option ? Integer(option.split(':').last) : 2000
 
+      name_option = ENV['AWS_XRAY_NAME']
+      DEFAULT_NAME = name_option ? name_option : nil
+
       # @return [String] name Logical service name for this application.
-      attr_accessor :name
+      def name
+        @name ||= DEFAULT_NAME
+      end
+      attr_writer :name
 
       # @return [Hash] client_options For xray-agent client.
       #   - host: e.g. '127.0.0.1'
