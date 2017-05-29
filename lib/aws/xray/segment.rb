@@ -78,7 +78,7 @@ module Aws
           id: @id,
           trace_id: @trace_id,
           start_time: @start_time,
-          annotation: @annotation,
+          annotations: @annotation,
           metadata: @metadata,
         }
         if @version
