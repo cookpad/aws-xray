@@ -11,6 +11,8 @@ module Aws
       end
 
       def call(req_env)
+        return @app.call(req_env) unless Context.started?
+
         name = @name || req_env.request_headers['Host'] || "unknown-request-from-#{Context.current.name}"
 
         Context.current.child_trace(remote: true, name: name) do |sub|

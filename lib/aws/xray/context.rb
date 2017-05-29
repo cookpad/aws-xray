@@ -18,6 +18,11 @@ module Aws
           Thread.current.thread_variable_get(VAR_NAME) || raise(NotSetError)
         end
 
+        # @return [Boolean]
+        def started?
+          !!Thread.current.thread_variable_get(VAR_NAME)
+        end
+
         # @param [String] name logical name of this tracing context.
         # @param [Aws::Xray::Client] client Require this parameter because the
         #   socket inside client can live longer than this context. For example

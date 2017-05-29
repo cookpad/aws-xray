@@ -191,4 +191,12 @@ RSpec.describe Aws::Xray::Faraday do
       expect(e['stack'].first['path']).to end_with('.rb')
     end
   end
+
+  context 'when tracing has not been started' do
+    it 'does not raise any errors' do
+      response = nil
+      expect { response = client.get('/foo') }.not_to raise_error
+      expect(response.status).to eq(200)
+    end
+  end
 end
