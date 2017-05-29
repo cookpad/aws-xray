@@ -107,4 +107,23 @@ RSpec.describe Aws::Xray::Rack do
       expect(body['cause']).not_to be_empty
     end
   end
+
+  describe 'path excluding' do
+    include Rack::Test::Methods
+
+    let(:app) do
+      builder = Rack::Builder.new
+      builder.use described_class, excluded_paths: ['/health_check'], client_options: { sock: io }
+      builder.run ->(_) { [200, {}, ['hello']] }
+      builder
+    end
+
+    it 'does not trace the request' do
+      get '/health_check'
+      expect(last_response.status).to eq(200)
+
+      io.rewind
+      expect(io.read).to be_empty
+    end
+  end
 end

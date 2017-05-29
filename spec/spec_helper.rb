@@ -3,6 +3,8 @@ require 'pry'
 $:.unshift File.expand_path('../lib', __dir__)
 require 'aws/xray'
 
+require 'rack/test'
+
 Aws::Xray.config.name = 'test-app'
 Aws::Xray.config.version = -> { 'deadbeef' }
 
