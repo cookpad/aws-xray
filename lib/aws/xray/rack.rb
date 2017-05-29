@@ -8,19 +8,29 @@ module Aws
     class Rack
       TRACE_ENV = 'HTTP_X_AMZN_TRACE_ID'.freeze
 
-      # TODO: excluded_paths, included_paths
-      #
       # @param  [Hash] client_options For xray-agent client.
       #   - host: e.g. '127.0.0.1'
       #   - port: e.g. 2000
       #   - sock: test purpose.
-      def initialize(app, client_options: {})
+      # @param [Array<String>] excluded_paths for health-check endpoints etc...
+      def initialize(app, client_options: {}, excluded_paths: [])
         @app = app
         @name = Aws::Xray.config.name || raise(MissingNameError)
         @client = Client.new(Aws::Xray.config.client_options.merge(client_options))
+        @excluded_paths = excluded_paths + Aws::Xray.config.excluded_paths
       end
 
       def call(env)
+        if @excluded_paths.include?(env['PATH_INFO'])
+          @app.call(env)
+        else
+          call_with_tracing(env)
+        end
+      end
+
+      private
+
+      def call_with_tracing(env)
         header_value = env[TRACE_ENV]
         trace = if header_value
                          Trace.build_from_header_value(header_value)

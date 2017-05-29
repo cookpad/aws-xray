@@ -98,7 +98,7 @@ end
 ```
 
 ## Configurations
-### Xray agent location
+### X-Ray agent location
 In container environments, we often run xray agent container beside application container.
 For that case, pass `AWS_XRAY_LOCATION` environment variable to container to specify host and port of xray agent.
 
@@ -106,7 +106,13 @@ For that case, pass `AWS_XRAY_LOCATION` environment variable to container to spe
 docker run --link xray:xray --env AWS_XRAY_LOCATION=xray:2000 my-application
 ```
 
-### Recording pplication version
+### Excluded paths
+To avoid tracing health checking requests, use "excluded paths" configuration.
+
+- Environment variable: `AWS_XRAY_EXCLUDED_PATHS=/health_check,/another_check`
+- Global configuration: `Aws::Xray.config.excluded_paths = %w[/health_check /another_check]`
+
+### Recording application version
 aws-xray automatically tries to set application version by reading `app_root/REVISION` file.
 If you want to set another version, set it with:
 

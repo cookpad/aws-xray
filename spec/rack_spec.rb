@@ -1,19 +1,25 @@
 require 'spec_helper'
 
 RSpec.describe Aws::Xray::Rack do
+  include Rack::Test::Methods
+
   let(:env) { { 'HTTP_X_AMZN_TRACE_ID' => 'Root=1-67891233-abcdef012345678912345678;Parent=53995c3f42cd8ad8' } }
   let(:io) { Aws::Xray::TestSocket.new }
 
   describe 'base tracing' do
-    let(:app) { ->(_) { [200, {}, ['hello']] } }
+    let(:app) do
+      builder = Rack::Builder.new
+      builder.use described_class, client_options: { sock: io }
+      builder.run ->(_) { [200, {}, ['hello']] }
+      builder
+    end
 
     it 'calls original app and adds formated trace header value and sends base segment' do
-      stack = described_class.new(app, client_options: { sock: io })
-      status, headers, body = stack.call(env)
+      get '/', {}, env
 
-      expect(status).to eq(200)
-      expect(body).to eq(['hello'])
-      expect(headers).to eq('X-Amzn-Trace-Id' => 'Root=1-67891233-abcdef012345678912345678;Sampled=1;Parent=53995c3f42cd8ad8')
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('hello')
+      expect(last_response.headers).to include('X-Amzn-Trace-Id' => 'Root=1-67891233-abcdef012345678912345678;Sampled=1;Parent=53995c3f42cd8ad8')
 
       io.rewind
       # Expected format is 2 lines of json string: http://docs.aws.amazon.com/xray/latest/devguide/xray-api.html
@@ -45,21 +51,21 @@ RSpec.describe Aws::Xray::Rack do
 
   describe 'sub segment tracing' do
     let(:app) do
-      -> (_) {
-        Aws::Xray::Context.current.child_trace(remote: false, name: 'funccall_f') do
-          # Do something like function calling or DB access
-        end
+      builder = Rack::Builder.new
+      builder.use described_class, client_options: { sock: io }
+      builder.run -> (_) {
+        Aws::Xray::Context.current.child_trace(remote: false, name: 'funccall_f') {}
         [200, {}, ['hello']]
       }
+      builder
     end
 
     it 'sends both base segment and sub segment' do
-      stack = described_class.new(app, client_options: { sock: io })
-      status, headers, body = stack.call(env)
+      get '/', {}, env
 
-      expect(status).to eq(200)
-      expect(body).to eq(['hello'])
-      expect(headers).to eq('X-Amzn-Trace-Id' => 'Root=1-67891233-abcdef012345678912345678;Sampled=1;Parent=53995c3f42cd8ad8')
+      expect(last_response.status).to eq(200)
+      expect(last_response.body).to eq('hello')
+      expect(last_response.headers).to include('X-Amzn-Trace-Id' => 'Root=1-67891233-abcdef012345678912345678;Sampled=1;Parent=53995c3f42cd8ad8')
 
       io.rewind
       sent_jsons = io.read.split("\n")
@@ -105,6 +111,23 @@ RSpec.describe Aws::Xray::Rack do
       expect(body['fault']).to eq(true)
       expect(body['cause']).to be_a(Hash)
       expect(body['cause']).not_to be_empty
+    end
+  end
+
+  describe 'path excluding' do
+    let(:app) do
+      builder = Rack::Builder.new
+      builder.use described_class, excluded_paths: ['/health_check'], client_options: { sock: io }
+      builder.run ->(_) { [200, {}, ['hello']] }
+      builder
+    end
+
+    it 'does not trace the request' do
+      get '/health_check', {}, env
+      expect(last_response.status).to eq(200)
+
+      io.rewind
+      expect(io.read).to be_empty
     end
   end
 end
