@@ -3,14 +3,10 @@ require 'socket'
 module Aws
   module Xray
     class Client
-      option = ENV['AWS_XRAY_LOCATION']
-      DEFAULT_HOST = option ? option.split(':').first : 'localhost'
-      DEFAULT_PORT = option ? Integer(option.split(':').last) : 2000
-
       # sock is for test
       #
       # XXX: keep options for implmenting copying later.
-      def initialize(host: DEFAULT_HOST, port: DEFAULT_PORT, sock: nil)
+      def initialize(host: nil, port: nil, sock: nil)
         @host, @port = host, port
         @sock = sock || UDPSocket.new
       end

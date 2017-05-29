@@ -5,6 +5,10 @@ module Aws
   module Xray
     # thread-unsafe, suppose to be used only in initialization phase.
     class Configuration
+      option = ENV['AWS_XRAY_LOCATION']
+      DEFAULT_HOST = option ? option.split(':').first : 'localhost'
+      DEFAULT_PORT = option ? Integer(option.split(':').last) : 2000
+
       # @return [String] name Logical service name for this application.
       attr_accessor :name
 
@@ -13,7 +17,7 @@ module Aws
       #   - port: e.g. 2000
       #   - sock: test purpose.
       def client_options
-        @client_options ||= { host: '127.0.0.1', port: 2000 }
+        @client_options ||= { host: DEFAULT_HOST, port: DEFAULT_PORT }
       end
       attr_writer :client_options
 
