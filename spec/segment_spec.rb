@@ -22,4 +22,12 @@ RSpec.describe Aws::Xray::Segment do
       expect(segment.to_h.has_key?(:end_time)).to eq(true)
     end
   end
+
+  describe '#set_annotation' do
+    it 'sets annotation' do
+      segment = described_class.build('test-app', trace)
+      segment.set_annotation(server: 'web-001')
+      expect(segment.to_h[:annotations][:server]).to eq('web-001')
+    end
+  end
 end
