@@ -78,7 +78,6 @@ end
 ### non-Rack app (like background jobs)
 ```ruby
 require 'aws-xray'
-Aws::Xray.config.name = 'my-app'
 
 # Build HTTP client with Faraday builder.
 # You can set the down stream app id to Host header as well.
@@ -88,7 +87,7 @@ client = Faraday.new('...') do |builder|
 end
 
 # Start new tracing context then perform arbitrary actions in the block.
-Aws::Xray.trace do |seg|
+Aws::Xray.trace(name: 'my-app-batch') do |seg|
   client.get('/foo')
 
   Aws::Xray::Context.current.child_trace do |sub|
