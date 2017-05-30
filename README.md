@@ -98,6 +98,9 @@ end
 
 ## Configurations
 ### X-Ray agent location
+aws-xray does not send any trace data default. Set `AWS_XRAY_LOCATION` environment variable like `AWS_XRAY_LOCATION=localhost:2000`
+or set proper aws-agent location with configuration interface like `Aws::Xray.config.client_options = { host: "localhost", port: 2000 }`.
+
 In container environments, we often run xray agent container beside application container.
 For that case, pass `AWS_XRAY_LOCATION` environment variable to container to specify host and port of xray agent.
 

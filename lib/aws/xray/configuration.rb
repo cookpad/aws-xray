@@ -6,8 +6,8 @@ module Aws
     # thread-unsafe, suppose to be used only in initialization phase.
     class Configuration
       option = ENV['AWS_XRAY_LOCATION']
-      DEFAULT_HOST = option ? option.split(':').first : 'localhost'
-      DEFAULT_PORT = option ? Integer(option.split(':').last) : 2000
+      DEFAULT_HOST = option ? option.split(':').first : nil
+      DEFAULT_PORT = option ? Integer(option.split(':').last) : nil
 
       name_option = ENV['AWS_XRAY_NAME']
       DEFAULT_NAME = name_option ? name_option : nil
@@ -24,9 +24,13 @@ module Aws
       # @return [Hash] client_options For xray-agent client.
       #   - host: e.g. '127.0.0.1'
       #   - port: e.g. 2000
-      #   - sock: test purpose.
       def client_options
-        @client_options ||= { host: DEFAULT_HOST, port: DEFAULT_PORT }
+        @client_options ||=
+          if DEFAULT_HOST && DEFAULT_PORT
+            { host: DEFAULT_HOST, port: DEFAULT_PORT }
+          else
+            { sock: NullSocket.new }
+          end
       end
       attr_writer :client_options
 
