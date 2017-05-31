@@ -70,7 +70,7 @@ If you don't use any Service Discovery tools, pass the down stream app name to t
 
 ```ruby
 Faraday.new('...') do |builder|
-  builder.use Aws::Xray::Faraday, name: 'down-stream-app-id'
+  builder.use Aws::Xray::Faraday, 'down-stream-app-id'
   # ...
 end
 ```
@@ -82,7 +82,7 @@ require 'aws-xray'
 # Build HTTP client with Faraday builder.
 # You can set the down stream app id to Host header as well.
 client = Faraday.new('...') do |builder|
-  builder.use Aws::Xray::Faraday, name: 'down-stream-app-id'
+  builder.use Aws::Xray::Faraday, 'down-stream-app-id'
   # ...
 end
 
