@@ -6,6 +6,7 @@ module Aws
       # @param [Object] app Faraday app.
       # @param [String] name Logical service name for downstream API.
       def initialize(app, name = nil)
+        raise ArgumentError.new("name must be a String but given a #{name.class}") if name && !name.is_a?(String)
         super(app)
         @name = name
       end
