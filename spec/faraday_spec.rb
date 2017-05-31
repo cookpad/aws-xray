@@ -192,6 +192,31 @@ RSpec.describe Aws::Xray::Faraday do
     end
   end
 
+  context 'without Host header' do
+    let(:client) do
+      Faraday.new do |builder|
+        builder.use Aws::Xray::Faraday, 'another-app'
+        builder.adapter :test, stubs
+      end
+    end
+
+    it 'accepts name parameter' do
+      res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
+        Aws::Xray::Context.current.base_trace do
+          client.get('/foo')
+        end
+      end
+      expect(res.status).to eq(200)
+
+      io.rewind
+      sent_jsons = io.read.split("\n")
+      expect(sent_jsons.size).to eq(4)
+
+      body = JSON.parse(sent_jsons[1])
+      expect(body['name']).to eq('another-app')
+    end
+  end
+
   context 'when tracing has not been started' do
     it 'does not raise any errors' do
       response = nil
