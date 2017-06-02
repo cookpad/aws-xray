@@ -23,10 +23,10 @@ RSpec.describe Aws::Xray::Segment do
     end
   end
 
-  describe '#set_annotation' do
+  describe '#add_annotation' do
     it 'sets annotation' do
       segment = described_class.build('test-app', trace)
-      segment.set_annotation(server: 'web-001')
+      segment.add_annotation(server: 'web-001')
       expect(segment.to_h[:annotations][:server]).to eq('web-001')
     end
   end
