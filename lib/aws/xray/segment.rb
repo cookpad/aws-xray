@@ -55,8 +55,7 @@ module Aws
       # @param [Hash] annotation Keys must consist of only alphabets and underscore.
       #   Values must be one of String or Integer or Boolean values.
       def set_annotation(annotation)
-        AnnotationNormalizer.call(annotation)
-        @annotation = @annotation.merge(annotation)
+        @annotation = @annotation.merge(AnnotationNormalizer.call(annotation))
       end
 
       # @param [Hash] metadata

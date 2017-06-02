@@ -5,31 +5,31 @@ RSpec.describe Aws::Xray::AnnotationNormalizer do
     let(:h) { { zip_code: 98101, internal2: false } }
 
     it 'passes' do
-      expect { described_class.call(h) }.not_to raise_error
+      expect(described_class.call(h)).to eq(zip_code: 98101, internal2: false)
     end
   end
 
-  context 'when keys are ng' do
-    let(:h) { { :"zip-code" => 98101, internal: false } }
+  context 'when a key contains "-"' do
+    let(:h) { { :"zip-code" => 98101, internal2: false } }
 
-    it 'raises' do
-      expect { described_class.call(h) }.to raise_error(RuntimeError)
+    it 'converts "-" to "_"' do
+      expect(described_class.call(h)).to eq(zip_code: 98101, internal2: false)
     end
   end
 
-  context 'when keys are ng' do
-    let(:h) { { :"zipcode?" => 98101, internal: false } }
+  context 'when a key contains invalid characters' do
+    let(:h) { { :"zip_code?あ" => 98101, internal2: false } }
 
-    it 'raises' do
-      expect { described_class.call(h) }.to raise_error(RuntimeError)
+    it 'removes them' do
+      expect(described_class.call(h)).to eq(zip_code: 98101, internal2: false)
     end
   end
 
-  context 'when values are ng' do
-    let(:h) { { zip_code: { num: 98101}, internal: false } }
+  context 'when a value is invalid type' do
+    let(:h) { { zip_code: { num: 98101}, internal2: false } }
 
-    it 'raises' do
-      expect { described_class.call(h) }.to raise_error(RuntimeError)
+    it 'converts it to string' do
+      expect(described_class.call(h)).to eq(zip_code: '{:num=>98101}', internal2: false)
     end
   end
 end

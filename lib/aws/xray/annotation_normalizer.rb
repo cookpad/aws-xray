@@ -1,15 +1,36 @@
 module Aws
   module Xray
+    # For specification: http://docs.aws.amazon.com/xray/latest/devguide/xray-api-segmentdocuments.html
     module AnnotationNormalizer
       extend self
 
       # @param [Hash] h annotation hash.
-      # @raise RuntimeError
+      # @return [Hash]
       def call(h)
-        invalid_keys = h.keys.reject {|k| k.to_s.match(/\A[A-Za-z0-9_]+\z/) }
-        raise 'Keys must be alphanumeric and underscore string' unless invalid_keys.empty?
-        invalid_values = h.values.reject {|v| v.is_a?(String) || v.is_a?(Integer) || (v == true || v == false) }
-        raise 'Values must be one of String or Integer or Boolean values' unless invalid_values.empty?
+        h.inject({}) {|init, (k, v)| init[normalize_key(k)] = normalize_value(v); init }
+      end
+
+      private
+
+      INVALID_PATTERN = /[^A-Za-z0-9_]+/
+      # - Convert keys which including '-' to '_'
+      #   because it might be common pit-fall.
+      # - Remove invalid chars.
+      def normalize_key(k)
+        k.to_s.gsub('-', '_').gsub(INVALID_PATTERN, '').to_sym
+      end
+
+      def normalize_value(v)
+        case v
+        when nil
+          nil
+        when Integer, Float
+          v
+        when true, false
+          v
+        else
+          v.to_s
+        end
       end
     end
   end

@@ -59,8 +59,7 @@ module Aws
       end
       # @param [Hash] h default annotation Hash.
       def default_annotation=(annotation)
-        AnnotationNormalizer.call(annotation)
-        @default_annotation = annotation
+        @default_annotation = AnnotationNormalizer.call(annotation)
       end
 
       DEFAULT_METADATA = {
