@@ -1,5 +1,5 @@
 require 'socket'
-require 'aws/xray/annotation_validator'
+require 'aws/xray/annotation_normalizer'
 
 module Aws
   module Xray
@@ -59,8 +59,7 @@ module Aws
       end
       # @param [Hash] h default annotation Hash.
       def default_annotation=(annotation)
-        AnnotationValidator.call(annotation)
-        @default_annotation = annotation
+        @default_annotation = AnnotationNormalizer.call(annotation)
       end
 
       DEFAULT_METADATA = {
