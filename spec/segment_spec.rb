@@ -21,6 +21,21 @@ RSpec.describe Aws::Xray::Segment do
       expect(segment.to_h.has_key?(:in_progress)).to eq(false)
       expect(segment.to_h.has_key?(:end_time)).to eq(true)
     end
+
+    context 'when illegal bytes are included in HTTP request' do
+      # \x61 = a, \xe3 = illegal bytes, \x62 = b, \x63 = c
+      let(:url) { "/user?name=\x61\xe3\x62\x63" }
+      let(:request) { Aws::Xray::Request.build(method: 'GET', url: url) }
+
+      it 'serialized successfully' do
+        segment = described_class.build('test-app', trace)
+        segment.set_http_request(request)
+        body = JSON.parse(segment.to_json)
+        expect(body['name']).to eq('test-app')
+        # \uFFFD is default unicode character in replacing illegal bytes.
+        expect(body['http']['request']['url']).to eq("/user?name=a\uFFFDbc")
+      end
+    end
   end
 
   describe '#add_annotation' do
