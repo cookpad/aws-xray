@@ -54,14 +54,16 @@ module Aws
 
       # @param [Hash] annotation Keys must consist of only alphabets and underscore.
       #   Values must be one of String or Integer or Boolean values.
-      def set_annotation(annotation)
+      def add_annotation(annotation)
         @annotation = @annotation.merge(AnnotationNormalizer.call(annotation))
       end
+      alias_method :set_annotation, :add_annotation
 
       # @param [Hash] metadata
-      def set_metadata(metadata)
+      def add_metadata(metadata)
         @metadata = @metadata.merge(metadata)
       end
+      alias_method :set_metadata, :add_metadata
 
       def finish(now = Time.now)
         @end_time = now.to_f
