@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Aws::Xray::AnnotationValidator do
+RSpec.describe Aws::Xray::AnnotationNormalizer do
   context 'when keys and values are ok' do
     let(:h) { { zip_code: 98101, internal2: false } }
 

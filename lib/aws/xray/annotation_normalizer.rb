@@ -1,6 +1,6 @@
 module Aws
   module Xray
-    module AnnotationValidator
+    module AnnotationNormalizer
       extend self
 
       # @param [Hash] h annotation hash.
