@@ -119,7 +119,7 @@ RSpec.describe Aws::Xray::Faraday do
         expect(e['id']).to match(/\A[0-9a-fA-F]{16}\z/)
         expect(e['message']).to eq('Got 5xx')
         expect(e['remote']).to eq(true)
-        expect(e['stack'].size).to eq(10)
+        expect(e['stack'].size).to be >= 1
         expect(e['stack'].first['path']).to end_with('.rb')
       end
     end
@@ -168,7 +168,7 @@ RSpec.describe Aws::Xray::Faraday do
       expect(e['message']).to eq('test_error')
       expect(e['type']).to eq('RuntimeError')
       expect(e['remote']).to eq(false)
-      expect(e['stack'].size).to eq(10)
+      expect(e['stack'].size).to be >= 1
       expect(e['stack'].first['path']).to end_with('.rb')
 
       body = JSON.parse(sent_jsons[3])
@@ -187,7 +187,7 @@ RSpec.describe Aws::Xray::Faraday do
       expect(e['message']).to eq('test_error')
       expect(e['type']).to eq('RuntimeError')
       expect(e['remote']).to eq(false)
-      expect(e['stack'].size).to eq(10)
+      expect(e['stack'].size).to be >= 1
       expect(e['stack'].first['path']).to end_with('.rb')
     end
   end
