@@ -29,15 +29,7 @@ And then execute:
 
 ## Usage
 ### Rails app
-Insert Rack middleware by yourself:
-
-```ruby
-# config/initializers/aws_xray.rb
-Aws::Xray.config.name = 'my-app'
-Rails.application.config.middleware.use Aws::Xray::Rack
-```
-
-Or just require `aws/xray/rails`. It uses your application name by default.
+Just require `aws/xray/rails`. It uses your application name by default.
 e.g. `Legacy::MyBlog` -> `legacy-my-blog`.
 
 ```ruby
@@ -90,7 +82,7 @@ end
 Aws::Xray.trace(name: 'my-app-batch') do |seg|
   client.get('/foo')
 
-  Aws::Xray::Context.current.child_trace do |sub|
+  Aws::Xray::Context.current.child_trace(name: 'fetch-user', remote: true) do |sub|
     # DB access or something to trace.
   end
 end
@@ -98,7 +90,7 @@ end
 
 ## Configurations
 ### X-Ray agent location
-aws-xray does not send any trace data default. Set `AWS_XRAY_LOCATION` environment variable like `AWS_XRAY_LOCATION=localhost:2000`
+aws-xray does not send any trace data dby efault. Set `AWS_XRAY_LOCATION` environment variable like `AWS_XRAY_LOCATION=localhost:2000`
 or set proper aws-agent location with configuration interface like `Aws::Xray.config.client_options = { host: "localhost", port: 2000 }`.
 
 In container environments, we often run xray agent container beside application container.
@@ -134,13 +126,13 @@ Aws::Xray.config.default_annotation = Aws::Xray.config.default_annotation.merge(
 
 Keys must be alphanumeric characters with underscore and values must be one of String or Integer or Boolean values.
 
-For meta data:
+For metadata:
 
 ```ruby
 Aws::Xray.config.default_metadata = Aws::Xray.config.default_metadata.merge(key: ['some', 'meaningful', 'value'])
 ```
 
-Note: See official document to know what annotation and metadata are in AWS X-Ray.
+Note: See official document about annotation and metadata in AWS X-Ray.
 
 ## Development
 
