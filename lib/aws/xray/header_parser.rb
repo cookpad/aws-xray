@@ -13,7 +13,7 @@ module Aws
         header_value.chars.each_with_index do |c, i|
           next if space?(c)
           if delim?(c)
-            h[key] = value
+            h[key] = value unless key.empty?
             key, value = '', ''
             value_mode = false
             next

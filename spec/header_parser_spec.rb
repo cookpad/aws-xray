@@ -45,4 +45,13 @@ RSpec.describe Aws::Xray::HeaderParser do
       expect(r).to eq('Root' => '1-5759e988-bd862e3fe1be46a994272793', 'Sampled' => '1')
     end
   end
+
+  context 'with extra delimiters between elements' do
+    let(:v) { 'Root=1-5759e988-bd862e3fe1be46a994272793;;;Sampled=1 ' }
+
+    it 'parses' do
+      r = described_class.parse(v)
+      expect(r).to eq('Root' => '1-5759e988-bd862e3fe1be46a994272793', 'Sampled' => '1')
+    end
+  end
 end
