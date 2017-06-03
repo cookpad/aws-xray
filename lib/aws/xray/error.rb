@@ -3,7 +3,7 @@ require 'aws/xray/cause'
 module Aws
   module Xray
     class Error < Struct.new(:error, :throttle, :fault, :e, :remote, :cause)
-      MAX_BACKTRACE_SIZE = 10
+      MAX_BACKTRACE_SIZE = 250
 
       def to_h
         h = {
