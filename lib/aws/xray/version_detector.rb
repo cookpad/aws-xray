@@ -5,7 +5,7 @@ module Aws
 
       def call
         if File.exist?(REVISION_PATH)
-          File.read(REVISION_PATH)
+          File.read(REVISION_PATH).chomp
         end
       end
     end
