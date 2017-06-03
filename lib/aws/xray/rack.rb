@@ -7,6 +7,7 @@ module Aws
   module Xray
     class Rack
       TRACE_ENV = 'HTTP_X_AMZN_TRACE_ID'.freeze
+      ORIGINAL_TRACE_ENV = 'HTTP_X_AMZN_TRACE_ID_ORIGINAL'.freeze
 
       # @param  [Hash] client_options For xray-agent client.
       #   - host: e.g. '127.0.0.1'
@@ -37,6 +38,8 @@ module Aws
                        else
                          Trace.generate
                        end
+        env[ORIGINAL_TRACE_ENV] = env[TRACE_ENV] # just for the record
+        env[TRACE_ENV] = trace.to_header_value
 
         Context.with_new_context(@name, @client, trace) do
           Context.current.base_trace do |seg|
