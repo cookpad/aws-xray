@@ -31,7 +31,7 @@ And then execute:
 ### Rails app
 Insert Rack middleware by yourself:
 
-```
+```ruby
 # config/initializers/aws_xray.rb
 Aws::Xray.config.name = 'my-app'
 Rails.application.config.middleware.use Aws::Xray::Rack
@@ -104,7 +104,7 @@ or set proper aws-agent location with configuration interface like `Aws::Xray.co
 In container environments, we often run xray agent container beside application container.
 For that case, pass `AWS_XRAY_LOCATION` environment variable to container to specify host and port of xray agent.
 
-```
+```bash
 docker run --link xray:xray --env AWS_XRAY_LOCATION=xray:2000 my-application
 ```
 
