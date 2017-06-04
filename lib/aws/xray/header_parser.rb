@@ -3,7 +3,6 @@ module Aws
     module HeaderParser
       extend self
 
-      # XXX: returns error when given invaild header_value
       # Header format document: http://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts-tracingheader
       def parse(header_value)
         h = {}
@@ -13,7 +12,7 @@ module Aws
         header_value.chars.each_with_index do |c, i|
           next if space?(c)
           if delim?(c)
-            h[key] = value
+            h[key] = value unless key.empty?
             key, value = '', ''
             value_mode = false
             next
