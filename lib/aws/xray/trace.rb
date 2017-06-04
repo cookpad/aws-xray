@@ -9,9 +9,10 @@ module Aws
           new(root: generate_root(now))
         end
 
-        def build_from_header_value(header_value)
+        def build_from_header_value(header_value, now = Time.now)
           h = HeaderParser.parse(header_value)
-          new(root: h.fetch('Root'), sampled: h['Sampled'] != '0', parent: h['Parent'])
+          root = h['Root'] || generate_root(now)
+          new(root: root, sampled: h['Sampled'] != '0', parent: h['Parent'])
         end
 
         private
