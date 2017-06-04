@@ -1,7 +1,6 @@
 require 'aws/xray/trace'
 require 'aws/xray/client'
 require 'aws/xray/context'
-require 'aws/xray/version_detector'
 
 module Aws
   module Xray

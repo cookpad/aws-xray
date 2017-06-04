@@ -1,5 +1,6 @@
 require 'socket'
 require 'aws/xray/annotation_normalizer'
+require 'aws/xray/version_detector'
 
 module Aws
   module Xray
