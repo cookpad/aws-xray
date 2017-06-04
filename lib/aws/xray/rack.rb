@@ -32,12 +32,7 @@ module Aws
       private
 
       def call_with_tracing(env)
-        header_value = env[TRACE_ENV]
-        trace = if header_value
-                         Trace.build_from_header_value(header_value)
-                       else
-                         Trace.generate
-                       end
+        trace = build_trace(env[TRACE_ENV])
         env[ORIGINAL_TRACE_ENV] = env[TRACE_ENV] # just for the record
         env[TRACE_ENV] = trace.to_header_value
 
@@ -49,6 +44,14 @@ module Aws
             headers[TRACE_HEADER] = trace.to_header_value
             [status, headers, body]
           end
+        end
+      end
+
+      def build_trace(header_value)
+        if header_value
+          Trace.build_from_header_value(header_value)
+        else
+          Trace.generate
         end
       end
     end
