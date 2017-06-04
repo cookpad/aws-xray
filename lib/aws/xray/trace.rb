@@ -17,7 +17,6 @@ module Aws
 
         private
 
-        # XXX: securerandom?
         def generate_root(now)
           "1-#{now.to_i.to_s(16)}-#{SecureRandom.hex(12)}"
         end

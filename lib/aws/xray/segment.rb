@@ -17,7 +17,6 @@ module Aws
 
       attr_reader :name, :id, :trace_id, :parent_id
 
-      # TODO: securerandom?
       def initialize(name:, trace_id:, parent_id: nil)
         @name = name
         @id = SecureRandom.hex(8)
