@@ -32,7 +32,7 @@ module Aws
 
       def call_with_tracing(env)
         trace = build_trace(env[TRACE_ENV])
-        env[ORIGINAL_TRACE_ENV] = env[TRACE_ENV] # just for the record
+        env[ORIGINAL_TRACE_ENV] = env[TRACE_ENV] if env[TRACE_ENV] # just for the record
         env[TRACE_ENV] = trace.to_header_value
 
         Context.with_new_context(@name, @client, trace) do
