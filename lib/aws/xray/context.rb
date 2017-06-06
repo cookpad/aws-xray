@@ -7,9 +7,17 @@ module Aws
       class << self
         VAR_NAME = :_aws_xray_context_
 
-        class NotSetError < ::StandardError
+        class BaseError < ::StandardError; end
+
+        class NotSetError < BaseError
           def initialize
             super('Context is not set for this thread')
+          end
+        end
+
+        class SegmentDidNotStartError < BaseError
+          def initialize
+            super('Segment did not start yet')
           end
         end
 
@@ -56,7 +64,7 @@ module Aws
         @name = name
         @client = client
         @trace = trace
-        @base_segment = Segment.build(@name, trace)
+        @base_segment_id = nil
       end
 
       # Rescue standard errors and record the error to the segment.
@@ -65,12 +73,14 @@ module Aws
       # @yield [Aws::Xray::Segment]
       # @return [Object] A value which given block returns.
       def base_trace
-        res = yield @base_segment
-        @client.send_segment(@base_segment)
+        base_segment = Segment.build(@name, @trace)
+        @base_segment_id = base_segment.id
+        res = yield base_segment
+        @client.send_segment(base_segment)
         res
       rescue => e
-        @base_segment.set_error(fault: true, e: e)
-        @client.send_segment(@base_segment)
+        base_segment.set_error(fault: true, e: e)
+        @client.send_segment(base_segment)
         raise e
       end
 
@@ -82,7 +92,9 @@ module Aws
       # @yield [Aws::Xray::SubSegment]
       # @return [Object] A value which given block returns.
       def child_trace(remote:, name:)
-        sub = SubSegment.build(@trace, @base_segment, remote: remote, name: name)
+        raise SegmentDidNotStartError unless @base_segment_id
+
+        sub = SubSegment.build(@trace, @base_segment_id, remote: remote, name: name)
         res = yield sub
         @client.send_segment(sub)
         res

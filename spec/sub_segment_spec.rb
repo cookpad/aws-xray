@@ -6,7 +6,7 @@ RSpec.describe Aws::Xray::SubSegment do
 
   describe 'serialization' do
     it 'serialized properly' do
-      sub = described_class.build(trace, segment, remote: true, name: 'funccall_f')
+      sub = described_class.build(trace, segment.id, remote: true, name: 'funccall_f')
       expect(sub.to_h).to match(
         name: 'funccall_f',
         id: /\A[0-9A-Fa-f]{16}\z/,
