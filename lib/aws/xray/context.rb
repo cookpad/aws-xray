@@ -75,13 +75,15 @@ module Aws
       def base_trace
         base_segment = Segment.build(@name, @trace)
         @base_segment_id = base_segment.id
-        res = yield base_segment
-        @client.send_segment(base_segment)
-        res
-      rescue => e
-        base_segment.set_error(fault: true, e: e)
-        @client.send_segment(base_segment)
-        raise e
+
+        begin
+          yield base_segment
+        rescue => e
+          base_segment.set_error(fault: true, e: e)
+          raise e
+        ensure
+          @client.send_segment(base_segment)
+        end
       end
 
       # Rescue standard errors and record the error to the sub segment.
@@ -93,15 +95,16 @@ module Aws
       # @return [Object] A value which given block returns.
       def child_trace(remote:, name:)
         raise SegmentDidNotStartError unless @base_segment_id
-
         sub = SubSegment.build(@trace, @base_segment_id, remote: remote, name: name)
-        res = yield sub
-        @client.send_segment(sub)
-        res
-      rescue => e
-        sub.set_error(fault: true, e: e)
-        @client.send_segment(sub)
-        raise e
+
+        begin
+          yield sub
+        rescue => e
+          sub.set_error(fault: true, e: e)
+          raise e
+        ensure
+          @client.send_segment(sub)
+        end
       end
     end
   end
