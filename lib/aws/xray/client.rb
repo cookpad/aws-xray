@@ -3,12 +3,13 @@ require 'socket'
 module Aws
   module Xray
     class Client
-      # sock is for test
-      #
-      # XXX: keep options for implmenting copying later.
+      # sock is for test.
+      # Still this object can performe mutable operation `#close`,
+      # freezes self to ensure everything except @sock won't be changed.
       def initialize(host: nil, port: nil, sock: nil)
-        @host, @port = host, port
+        @host, @port = host.freeze, port.freeze
         @sock = sock || UDPSocket.new
+        freeze
       end
 
       # @param [Aws::Xray::Segment] segment

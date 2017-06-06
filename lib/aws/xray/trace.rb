@@ -3,6 +3,7 @@ require 'securerandom'
 
 module Aws
   module Xray
+    # Imutable
     class Trace
       class << self
         def generate(now = Time.now)
@@ -25,9 +26,10 @@ module Aws
       attr_reader :root, :parent
 
       def initialize(root:, sampled: true, parent: nil)
-        @root = root
+        @root = root.freeze
         @sampled = sampled
-        @parent = parent
+        @parent = parent.freeze
+        freeze
       end
 
       def to_header_value
@@ -46,7 +48,7 @@ module Aws
       end
 
       def copy(parent:)
-        self.class.new(root: @root, sampled: @sampled, parent: parent)
+        self.class.new(root: @root.dup, sampled: @sampled, parent: parent.freeze)
       end
     end
   end

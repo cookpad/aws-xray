@@ -60,11 +60,21 @@ module Aws
 
       attr_reader :name
 
-      def initialize(name, client, trace)
-        @name = name
+      # client and trace are frozen by default.
+      def initialize(name, client, trace, base_segment_id = nil)
+        @name = name.freeze
         @client = client
         @trace = trace
-        @base_segment_id = nil
+        @base_segment_id = base_segment_id
+      end
+
+      # Curretly context object is thread safe, so copying is not necessary,
+      # but in case we need this, offer copy interface for multi threaded
+      # environment.
+      #
+      # client and trace should be imutable and thread-safe.
+      def copy
+        self.class.new(@name, @client, @trace, @base_segment_id)
       end
 
       # Rescue standard errors and record the error to the segment.
@@ -74,7 +84,7 @@ module Aws
       # @return [Object] A value which given block returns.
       def base_trace
         base_segment = Segment.build(@name, @trace)
-        @base_segment_id = base_segment.id
+        @base_segment_id = base_segment.id.freeze
 
         begin
           yield base_segment
