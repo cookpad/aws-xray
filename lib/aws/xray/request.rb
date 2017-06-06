@@ -15,9 +15,9 @@ module Aws
           build(
             method: req.request_method,
             url: req.url,
-            client_ip: env['X-Forwarded-For'],
-            x_forwarded_for: !!env['X-Forwarded-For'],
             user_agent: req.user_agent,
+            client_ip: req.ip,
+            x_forwarded_for: !!env['HTTP_X_FORWARDED_FOR'],
             traced: false,
           )
         end
@@ -28,7 +28,7 @@ module Aws
             url: env.url.to_s,
             user_agent: env.request_headers['User-Agent'],
             client_ip: nil,
-            x_forwarded_for: false,
+            x_forwarded_for: nil,
             traced: false,
           )
         end
