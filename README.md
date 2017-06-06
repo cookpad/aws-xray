@@ -104,7 +104,7 @@ docker run --link xray:xray --env AWS_XRAY_LOCATION=xray:2000 my-application
 To avoid tracing health checking requests, use "excluded paths" configuration.
 
 - Environment variable: `AWS_XRAY_EXCLUDED_PATHS=/health_check,/another_check`
-- Global configuration: `Aws::Xray.config.excluded_paths = %w[/health_check /another_check]`
+- Global configuration: `Aws::Xray.config.excluded_paths = ['/health_check', '/another_check', %r{/token/.+}]`
 
 ### Recording application version
 aws-xray automatically tries to set application version by reading `app_root/REVISION` file.

@@ -117,17 +117,33 @@ RSpec.describe Aws::Xray::Rack do
   describe 'path excluding' do
     let(:app) do
       builder = Rack::Builder.new
-      builder.use described_class, excluded_paths: ['/health_check'], client_options: { sock: io }
+      builder.use described_class, excluded_paths: excluded_paths, client_options: { sock: io }
       builder.run ->(_) { [200, {}, ['hello']] }
       builder
     end
 
-    it 'does not trace the request' do
-      get '/health_check', {}, env
-      expect(last_response.status).to eq(200)
+    context 'with strings' do
+      let(:excluded_paths) { ['/health_check'] }
 
-      io.rewind
-      expect(io.read).to be_empty
+      it 'does not trace the request' do
+        get '/health_check', {}, env
+        expect(last_response.status).to eq(200)
+
+        io.rewind
+        expect(io.read).to be_empty
+      end
+    end
+
+    context 'with regexps' do
+      let(:excluded_paths) { [/check/] }
+
+      it 'does not trace the request' do
+        get '/health_check', {}, env
+        expect(last_response.status).to eq(200)
+
+        io.rewind
+        expect(io.read).to be_empty
+      end
     end
   end
 end

@@ -12,7 +12,7 @@ module Aws
       #   - host: e.g. '127.0.0.1'
       #   - port: e.g. 2000
       #   - sock: test purpose.
-      # @param [Array<String>] excluded_paths for health-check endpoints etc...
+      # @param [Array<String,Regexp>] excluded_paths for health-check endpoints etc...
       def initialize(app, client_options: {}, excluded_paths: [])
         @app = app
         @name = Aws::Xray.config.name || raise(MissingNameError)
@@ -21,7 +21,7 @@ module Aws
       end
 
       def call(env)
-        if @excluded_paths.include?(env['PATH_INFO'])
+        if excluded_path?(env['PATH_INFO'])
           @app.call(env)
         else
           call_with_tracing(env)
@@ -52,6 +52,10 @@ module Aws
         else
           Trace.generate
         end
+      end
+
+      def excluded_path?(path)
+        !!@excluded_paths.find {|p| p === path }
       end
     end
   end
