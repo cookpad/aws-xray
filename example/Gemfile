@@ -6,3 +6,4 @@ gem 'aws-xray', path: File.expand_path('../', __dir__)
 
 gem 'foreman'
 gem 'pry-byebug'
+gem 'puma'
