@@ -10,7 +10,7 @@ AWS X-Ray is a ditributed tracing system. See more detail about AWS X-Ray at [of
 ## Features
 - Rack middleware.
 - Faraday middleware.
-- Propagatin support limited in single thread environment.
+- Propagatin support in both single and multi thread environment.
 - Tracing HTTP request/response.
 - Tracing errors.
 - Annotation and metadata support.
@@ -85,6 +85,16 @@ Aws::Xray.trace(name: 'my-app-batch') do |seg|
   Aws::Xray::Context.current.child_trace(name: 'fetch-user', remote: true) do |sub|
     # DB access or something to trace.
   end
+end
+```
+
+### Multi threaded environment
+Tracing context is thread local. To pass current tracing context, copy current tracing context:
+
+```ruby
+Thread.new(Aws::Xray::Context.current.copy) do |context|
+  Aws::Xray::Context.set_current(context)
+  # Do something
 end
 ```
 

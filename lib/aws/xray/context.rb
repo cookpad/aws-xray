@@ -26,6 +26,11 @@ module Aws
           Thread.current.thread_variable_get(VAR_NAME) || raise(NotSetError)
         end
 
+        # @param [Aws::Xray::Context] context
+        def set_current(context)
+          Thread.current.thread_variable_set(VAR_NAME, context)
+        end
+
         # @return [Boolean]
         def started?
           !!Thread.current.thread_variable_get(VAR_NAME)
@@ -73,6 +78,8 @@ module Aws
       # environment.
       #
       # client and trace should be imutable and thread-safe.
+      #
+      # See README for example.
       def copy
         self.class.new(@name, @client, @trace, @base_segment_id)
       end
