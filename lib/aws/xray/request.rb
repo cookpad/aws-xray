@@ -6,7 +6,7 @@ module Aws
     attrs = [:method, :url, :user_agent, :client_ip, :x_forwarded_for, :traced]
     class Request < Struct.new(*attrs)
       class << self
-        def build(method:, url:, user_agent: nil, client_ip: nil, x_forwarded_for: nil, traced: false)
+        def build(method:, url:, user_agent: nil, client_ip: nil, x_forwarded_for: nil, traced: nil)
           new(encode(method), drop_params(encode(url)), encode(user_agent), encode(client_ip), x_forwarded_for, traced)
         end
 
@@ -18,18 +18,18 @@ module Aws
             user_agent: req.user_agent,
             client_ip: req.ip,
             x_forwarded_for: !!env['HTTP_X_FORWARDED_FOR'],
-            traced: false,
+            traced: nil,
           )
         end
 
-        def build_from_faraday_env(env)
+        def build_from_faraday_env(env, traced: false)
           build(
             method: env.method.to_s.upcase,
             url: env.url.to_s,
             user_agent: env.request_headers['User-Agent'],
             client_ip: nil,
             x_forwarded_for: nil,
-            traced: false,
+            traced: traced,
           )
         end
 
