@@ -13,7 +13,6 @@ module Aws
 
       # @param [Aws::Xray::Segment] segment
       def send_segment(segment)
-        segment.finish
         payload = %!{"format": "json", "version": 1}\n#{segment.to_json}\n!
         len = @sock.send(payload, 0, @host, @port)
         # TODO: retry

@@ -82,6 +82,7 @@ module Aws
           base_segment.set_error(fault: true, e: e)
           raise e
         ensure
+          base_segment.finish
           @client.send_segment(base_segment)
         end
       end
@@ -103,6 +104,7 @@ module Aws
           sub.set_error(fault: true, e: e)
           raise e
         ensure
+          sub.finish
           @client.send_segment(sub)
         end
       end
