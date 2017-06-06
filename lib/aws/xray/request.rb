@@ -1,4 +1,5 @@
 require 'uri'
+require 'rack'
 
 module Aws
   module Xray
@@ -10,12 +11,13 @@ module Aws
         end
 
         def build_from_rack_env(env)
+          req = ::Rack::Request.new(env)
           build(
-            method: env['REQUEST_METHOD'],
-            url: env['REQUEST_URI'],
-            user_agent: env['HTTP_USER_AGENT'],
+            method: req.request_method,
+            url: req.url,
             client_ip: env['X-Forwarded-For'],
             x_forwarded_for: !!env['X-Forwarded-For'],
+            user_agent: req.user_agent,
             traced: false,
           )
         end
