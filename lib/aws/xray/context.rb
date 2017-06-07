@@ -87,7 +87,7 @@ module Aws
       # @return [Object] A value which given block returns.
       def base_trace
         base_segment = Segment.build(@name, @trace)
-        @base_segment_id = base_segment.id.freeze
+        @base_segment_id = base_segment.id.dup
 
         begin
           yield base_segment
