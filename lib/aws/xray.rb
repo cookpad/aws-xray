@@ -28,8 +28,6 @@ module Aws
           yield seg
         end
       end
-    ensure
-      client.close
     end
   end
 end

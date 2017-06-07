@@ -2,28 +2,28 @@ require 'socket'
 
 module Aws
   module Xray
+    # Own the responsibility of holding destination address and sending
+    # segments.
     class Client
       # sock is for test.
-      # Still this object can performe mutable operation `#close`,
-      # freezes self to ensure everything except @sock won't be changed.
       def initialize(host: nil, port: nil, sock: nil)
         @host, @port = host.freeze, port.freeze
-        @sock = sock || UDPSocket.new
+        @sock = sock
         freeze
       end
 
+      # When UDPSocket#send can not send all bytes, just give up it.
       # @param [Aws::Xray::Segment] segment
       def send_segment(segment)
         payload = %!{"format": "json", "version": 1}\n#{segment.to_json}\n!
-        len = @sock.send(payload, 0, @host, @port)
-        # TODO: retry
-        if payload.size != len
-          $stderr.puts("Can not send all bytes: #{len} sent")
-        end
-      end
+        sock = @sock || UDPSocket.new
 
-      def close
-        @sock.close
+        begin
+          len = sock.send(payload, 0, @host, @port)
+          $stderr.puts("Can not send all bytes: #{len} sent") if payload.size != len
+        ensure
+          sock.close
+        end
       end
     end
   end
