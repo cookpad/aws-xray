@@ -2,28 +2,28 @@ require 'socket'
 
 module Aws
   module Xray
+    # Own the responsibility of holding destination address and sending
+    # segments.
     class Client
-      # sock is for test
-      #
-      # XXX: keep options for implmenting copying later.
+      # sock is for test.
       def initialize(host: nil, port: nil, sock: nil)
-        @host, @port = host, port
-        @sock = sock || UDPSocket.new
+        @host, @port = host.freeze, port.freeze
+        @sock = sock
+        freeze
       end
 
+      # When UDPSocket#send can not send all bytes, just give up it.
       # @param [Aws::Xray::Segment] segment
       def send_segment(segment)
-        segment.finish
         payload = %!{"format": "json", "version": 1}\n#{segment.to_json}\n!
-        len = @sock.send(payload, 0, @host, @port)
-        # TODO: retry
-        if payload.size != len
-          $stderr.puts("Can not send all bytes: #{len} sent")
-        end
-      end
+        sock = @sock || UDPSocket.new
 
-      def close
-        @sock.close
+        begin
+          len = sock.send(payload, 0, @host, @port)
+          $stderr.puts("Can not send all bytes: #{len} sent") if payload.size != len
+        ensure
+          sock.close
+        end
       end
     end
   end
