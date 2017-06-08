@@ -69,6 +69,7 @@ module Aws
         @trace = trace
         @base_segment_id = base_segment_id
         @disabled_ids = []
+        @sub_segment_name = nil
       end
 
       # Curretly context object is thread safe, so copying is not necessary,
@@ -111,7 +112,7 @@ module Aws
       # @return [Object] A value which given block returns.
       def child_trace(remote:, name:)
         raise SegmentDidNotStartError unless @base_segment_id
-        sub = SubSegment.build(@trace, @base_segment_id, remote: remote, name: name)
+        sub = SubSegment.build(@trace, @base_segment_id, remote: remote, name: overwrite_name(name))
 
         begin
           yield sub
@@ -140,6 +141,31 @@ module Aws
 
       def disabled?(id)
         @disabled_ids.include?(id)
+      end
+
+      # Temporary overwrite sub segment with given data in given block.
+      # The overwriting will be occured only one time.
+      # CAUTION: the injection will NOT be propagated between threads!!
+      #
+      # @param [String] name
+      def overwrite_sub_segment(name:)
+        @sub_segment_name = name.to_s
+
+        begin
+          yield
+        ensure
+          @sub_segment_name = nil
+        end
+      end
+
+      private
+
+      def overwrite_name(name)
+        return name unless @sub_segment_name
+
+        name = @sub_segment_name
+        @sub_segment_name = nil
+        name
       end
     end
   end

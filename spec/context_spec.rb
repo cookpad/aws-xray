@@ -2,9 +2,10 @@ require 'spec_helper'
 require 'timeout'
 
 RSpec.describe Aws::Xray::Context do
+  let(:trace) { Aws::Xray::Trace.generate }
+
   describe 'thread safety' do
     let(:client) { double(:client, send: nil) }
-    let(:trace) { Aws::Xray::Trace.generate }
     before { allow(client).to receive(:copy).and_return(client) }
 
     specify 'a context is not shared between threads' do
@@ -56,6 +57,55 @@ RSpec.describe Aws::Xray::Context do
           expect(names).not_to include(name)
           names << name
         end
+      end
+    end
+  end
+
+  describe '#overwrite_sub_segment' do
+    let(:client) { Aws::Xray::Client.new(sock: io) }
+    let(:io) { Aws::Xray::TestSocket.new }
+
+    context 'when not set' do
+      it 'does not overwrite' do
+        Aws::Xray::Context.with_new_context('test-app', client, trace) do
+          Aws::Xray::Context.current.base_trace do
+            Aws::Xray::Context.current.child_trace(name: 'name1', remote: false) do
+              Aws::Xray::Context.current.child_trace(name: 'name2', remote: false) {}
+            end
+          end
+        end
+
+        sent_jsons = io.tap(&:rewind).read.split("\n")
+        expect(sent_jsons.size).to eq(6)
+        normal_one = JSON.parse(sent_jsons[1])
+        overwrote_one = JSON.parse(sent_jsons[3])
+
+        expect(overwrote_one['name']).to eq('name1')
+        expect(normal_one['name']).to eq('name2')
+        expect(overwrote_one['parent_id']).to eq(normal_one['parent_id'])
+      end
+    end
+
+    context 'when set' do
+      it 'overwrites sub segment at once' do
+        Aws::Xray::Context.with_new_context('test-app', client, trace) do
+          Aws::Xray::Context.current.base_trace do
+            Aws::Xray::Context.current.overwrite_sub_segment(name: 'overwrite') do
+              Aws::Xray::Context.current.child_trace(name: 'name1', remote: false) do
+                Aws::Xray::Context.current.child_trace(name: 'name2', remote: false) {}
+              end
+            end
+          end
+        end
+
+        sent_jsons = io.tap(&:rewind).read.split("\n")
+        expect(sent_jsons.size).to eq(6)
+        normal_one = JSON.parse(sent_jsons[1])
+        overwrote_one = JSON.parse(sent_jsons[3])
+
+        expect(overwrote_one['name']).to eq('overwrite')
+        expect(normal_one['name']).to eq('name2')
+        expect(overwrote_one['parent_id']).to eq(normal_one['parent_id'])
       end
     end
   end
