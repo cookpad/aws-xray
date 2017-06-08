@@ -1,6 +1,10 @@
 require 'pry'
+
+require 'net/http'
+
 require 'faraday'
 require 'aws-xray'
+require 'aws/xray/hooks/net_http'
 
 user_app = ENV.fetch('USER_APP') # host:port
 campain_app = ENV.fetch('CAMPAIN_APP') # host:port
@@ -15,11 +19,11 @@ run Proc.new {|env|
   end
   user_res = user_client.get('/')
 
-  campain_client = Faraday.new(url: "http://#{campain_app}/", headers: { 'Host' => 'campain-app' }) do |builder|
-    builder.use Aws::Xray::Faraday
-    builder.adapter Faraday.default_adapter
+  uri = URI("http://#{campain_app}")
+  host, port = campain_app.split(':')
+  campain_res = Net::HTTP.start(host, port) do |http|
+    http.request(Net::HTTP::Get.new(uri))
   end
-  campain_res = campain_client.get('/')
 
   body = "awesome recipe by #{user_res.body}"
   if campain_res.body == '1'
