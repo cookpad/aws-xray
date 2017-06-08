@@ -6,6 +6,7 @@ module Aws
       module NetHttp
         def request(req, *args)
           return super unless Context.started?
+          return super if Context.current.disabled?(:net_http)
 
           uri = URI('')
           uri.scheme = use_ssl? ? 'https' : 'http'
