@@ -29,7 +29,7 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
         Aws::Xray::Context.current.base_trace do
           Net::HTTP.start(host, port) do |http|
             uri = URI("http://#{host}:#{port}/hello")
-            response = http.request(Net::HTTP::Get.new(uri, { 'Host' => 'target-app' }))
+            response = http.request(Net::HTTP::Get.new(uri, { 'X-Aws-Xray-Name' => 'target-app' }))
             queue.push(response)
           end
         end
