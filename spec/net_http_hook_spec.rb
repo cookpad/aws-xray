@@ -30,6 +30,9 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
           queue.push(Net::HTTP.get_response(URI("http://#{host}:#{port}/")))
         end
       end
+
+      # For waiting sending segments in this thread.
+      queue.push(nil)
     end
   end
 
@@ -37,7 +40,7 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
     server_thread = build_server_thread
     client_thread = build_client_thread
 
-    request_string, response = queue.pop, queue.pop
+    request_string, response, _ = queue.pop, queue.pop, queue.pop
     expect(request_string).to match(/X-Amzn-Trace-Id/)
     expect(response.code).to eq('200')
 
