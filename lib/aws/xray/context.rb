@@ -68,6 +68,7 @@ module Aws
         @client = client
         @trace = trace
         @base_segment_id = base_segment_id
+        @disabled_ids = []
       end
 
       # Curretly context object is thread safe, so copying is not necessary,
@@ -121,6 +122,24 @@ module Aws
           sub.finish
           @client.send_segment(sub)
         end
+      end
+
+      # Temporary disabling tracing for given id in given block.
+      # CAUTION: the disabling will NOT be propagated between threads!!
+      #
+      # @param [Symbol] id must be unique between tracing methods.
+      def disable_trace(id)
+        @disabled_ids << id
+
+        begin
+          yield
+        ensure
+          @disabled_ids.delete(id)
+        end
+      end
+
+      def disabled?(id)
+        @disabled_ids.include?(id)
       end
     end
   end

@@ -21,7 +21,8 @@ module Aws
           req_env.request_headers[TRACE_HEADER] = propagate_trace.to_header_value
           sub.set_http_request(Request.build_from_faraday_env(req_env))
 
-          @app.call(req_env).on_complete do |res_env|
+          res = Context.current.disable_trace(:net_http) { @app.call(req_env) }
+          res.on_complete do |res_env|
             sub.set_http_response(res_env.status, res_env.response_headers['Content-Length'])
             case res_env.status
             when 499
