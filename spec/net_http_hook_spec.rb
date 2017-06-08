@@ -27,7 +27,11 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
     Thread.new do
       Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
         Aws::Xray::Context.current.base_trace do
-          queue.push(Net::HTTP.get_response(URI("http://#{host}:#{port}/")))
+          Net::HTTP.start(host, port) do |http|
+            uri = URI("http://#{host}:#{port}/hello")
+            response = http.request(Net::HTTP::Get.new(uri, { 'X-Aws-Xray-Name' => 'target-app' }))
+            queue.push(response)
+          end
         end
       end
 
@@ -49,14 +53,14 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
     body = JSON.parse(sent_jsons[1])
     parent_body = JSON.parse(sent_jsons[3])
 
-    expect(body['name']).to eq(host)
+    expect(body['name']).to eq('target-app')
     expect(body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
     expect(body['parent_id']).to eq(parent_body['id'])
     expect(body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
 
     request_part = body['http']['request']
     expect(request_part['method']).to eq('GET')
-    expect(request_part['url']).to eq("http://#{host}:#{port}/")
+    expect(request_part['url']).to eq("http://#{host}:#{port}/hello")
     expect(request_part['user_agent']).to match(/Ruby/)
     expect(body['http']['response']['status']).to eq(200)
 
