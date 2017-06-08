@@ -2,7 +2,7 @@ require 'pry'
 
 $:.unshift File.expand_path('../lib', __dir__)
 require 'aws/xray'
-require 'aws/xray/hooks/net_http'
+require 'aws/xray/hooks/all'
 
 require 'rack/test'
 

@@ -89,13 +89,16 @@ Aws::Xray.trace(name: 'my-app-batch') do |seg|
 end
 ```
 
-### net/http hook
-To monkey patch net/http and records out-going http requests automatically, just require `aws/xray/hooks/net_http`:
+### Hooks
+You can enable all the hooks with:
 
 ```ruby
 # Gemfile
-gem 'aws-xray', require: 'aws/xray/hooks/net_http'
+gem 'aws-xray', require: 'aws/xray/hooks/all'
 ```
+
+#### net/http hook
+To monkey patch net/http and records out-going http requests automatically, just require `aws/xray/hooks/net_http`:
 
 If you can pass headers for net/http client, you can setup subsegment name via `X-Aws-Xray-Name` header:
 
