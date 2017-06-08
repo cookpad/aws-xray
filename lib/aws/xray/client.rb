@@ -12,7 +12,7 @@ module Aws
       end
 
       def copy
-        self.class.new(host: @host ? @host.dup : nil, port: @port ? @port.dup : nil, sock: @sock)
+        self.class.new(host: @host ? @host.dup : nil, port: @port, sock: @sock)
       end
 
       # When UDPSocket#send can not send all bytes, just give up it.
