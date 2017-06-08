@@ -8,9 +8,10 @@ It enables you to capture in-coming HTTP requests and out-going HTTP requests an
 AWS X-Ray is a ditributed tracing system. See more detail about AWS X-Ray at [official document](http://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html).
 
 ## Features
+- Propagatin support in both single and multi thread environment.
 - Rack middleware.
 - Faraday middleware.
-- Propagatin support in both single and multi thread environment.
+- net/http hook.
 - Tracing HTTP request/response.
 - Tracing errors.
 - Annotation and metadata support.
@@ -85,6 +86,32 @@ Aws::Xray.trace(name: 'my-app-batch') do |seg|
   Aws::Xray::Context.current.child_trace(name: 'fetch-user', remote: true) do |sub|
     # DB access or something to trace.
   end
+end
+```
+
+### net/http hook
+To monkey patch net/http and records out-going http requests automatically, just require `aws/xray/hooks/net_http`:
+
+```ruby
+# Gemfile
+gem 'aws-xray', require: 'aws/xray/hooks/net_http'
+```
+
+If you can pass headers for net/http client, you can setup subsegment name via `X-Aws-Xray-Name` header:
+
+```ruby
+Net::HTTP.start(host, port) do |http|
+  req = Net::HTTP::Get.new(uri, { 'X-Aws-Xray-Name' => 'target-app' })
+  http.request(req)
+end
+```
+
+If you can't access headers, e.g. external client library like aws-sdk or dogapi-rb, setup subsegment name by `Aws::Xray::Context#overwrite_sub_segment`:
+
+```ruby
+client = Aws::Sns::Client.new
+response = Aws::Xray::Context.current.overwrite_sub_segment(name: 'sns') do
+  client.create_topic(...)
 end
 ```
 
