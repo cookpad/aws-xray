@@ -26,10 +26,9 @@ module Aws
       attr_reader :root, :parent
 
       def initialize(root:, sampled: true, parent: nil)
-        @root = root.freeze
+        @root = root
         @sampled = sampled
-        @parent = parent.freeze
-        freeze
+        @parent = parent
       end
 
       def to_header_value
@@ -47,8 +46,8 @@ module Aws
         !!@parent
       end
 
-      def copy(parent:)
-        self.class.new(root: @root.dup, sampled: @sampled, parent: parent.freeze)
+      def copy(parent: @parent)
+        self.class.new(root: @root.dup, sampled: @sampled, parent: parent ? parent.dup : nil)
       end
     end
   end

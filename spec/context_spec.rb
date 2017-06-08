@@ -5,6 +5,7 @@ RSpec.describe Aws::Xray::Context do
   describe 'thread safety' do
     let(:client) { double(:client, send: nil) }
     let(:trace) { Aws::Xray::Trace.generate }
+    before { allow(client).to receive(:copy).and_return(client) }
 
     specify 'a context is not shared between threads' do
       described_class.with_new_context('test-app', client, trace) do

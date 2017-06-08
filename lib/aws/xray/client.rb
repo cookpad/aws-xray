@@ -7,9 +7,12 @@ module Aws
     class Client
       # sock is for test.
       def initialize(host: nil, port: nil, sock: nil)
-        @host, @port = host.freeze, port.freeze
+        @host, @port = host, port
         @sock = sock
-        freeze
+      end
+
+      def copy
+        self.class.new(host: @host ? @host.dup : nil, port: @port ? @port.dup : nil, sock: @sock)
       end
 
       # When UDPSocket#send can not send all bytes, just give up it.

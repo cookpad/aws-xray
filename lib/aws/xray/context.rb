@@ -63,7 +63,8 @@ module Aws
 
       # client and trace are frozen by default.
       def initialize(name, client, trace, base_segment_id = nil)
-        @name = name.freeze
+        raise 'name is required' unless name
+        @name = name
         @client = client
         @trace = trace
         @base_segment_id = base_segment_id
@@ -77,7 +78,7 @@ module Aws
       #
       # See README for example.
       def copy
-        self.class.new(@name, @client, @trace, @base_segment_id)
+        self.class.new(@name.dup, @client.copy, @trace.copy, @base_segment_id ? @base_segment_id.dup : nil)
       end
 
       # Rescue standard errors and record the error to the segment.
@@ -87,7 +88,7 @@ module Aws
       # @return [Object] A value which given block returns.
       def base_trace
         base_segment = Segment.build(@name, @trace)
-        @base_segment_id = base_segment.id.dup
+        @base_segment_id = base_segment.id
 
         begin
           yield base_segment
