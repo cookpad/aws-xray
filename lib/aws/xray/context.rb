@@ -148,7 +148,7 @@ module Aws
       # CAUTION: the injection will NOT be propagated between threads!!
       #
       # @param [String] name
-      def overwrite_sub_segment(name:)
+      def overwrite(name:)
         @sub_segment_name = name.to_s
 
         begin

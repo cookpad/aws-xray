@@ -61,7 +61,7 @@ RSpec.describe Aws::Xray::Context do
     end
   end
 
-  describe '#overwrite_sub_segment' do
+  describe '#overwrite' do
     let(:client) { Aws::Xray::Client.new(sock: io) }
     let(:io) { Aws::Xray::TestSocket.new }
 
@@ -90,7 +90,7 @@ RSpec.describe Aws::Xray::Context do
       it 'overwrites sub segment at once' do
         Aws::Xray::Context.with_new_context('test-app', client, trace) do
           Aws::Xray::Context.current.base_trace do
-            Aws::Xray::Context.current.overwrite_sub_segment(name: 'overwrite') do
+            Aws::Xray::Context.current.overwrite(name: 'overwrite') do
               Aws::Xray::Context.current.child_trace(name: 'name1', remote: false) do
                 Aws::Xray::Context.current.child_trace(name: 'name2', remote: false) {}
               end
