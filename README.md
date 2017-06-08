@@ -106,11 +106,11 @@ Net::HTTP.start(host, port) do |http|
 end
 ```
 
-If you can't access headers, e.g. external client library like aws-sdk or dogapi-rb, setup subsegment name by `Aws::Xray::Context#overwrite_sub_segment`:
+If you can't access headers, e.g. external client library like aws-sdk or dogapi-rb, setup subsegment name by `Aws::Xray::Context#overwrite`:
 
 ```ruby
 client = Aws::Sns::Client.new
-response = Aws::Xray::Context.current.overwrite_sub_segment(name: 'sns') do
+response = Aws::Xray::Context.current.overwrite(name: 'sns') do
   client.create_topic(...)
 end
 ```
