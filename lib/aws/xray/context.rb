@@ -27,8 +27,11 @@ module Aws
         end
 
         # @param [Aws::Xray::Context] context
-        def set_current(context)
+        def with_given_context(context)
           Thread.current.thread_variable_set(VAR_NAME, context)
+          yield
+        ensure
+          remove_current
         end
 
         # @return [Boolean]
