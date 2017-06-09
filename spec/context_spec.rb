@@ -21,8 +21,9 @@ RSpec.describe Aws::Xray::Context do
       described_class.with_new_context('test-app', client, trace) do
         expect {
           Thread.new(Aws::Xray::Context.current.copy) {|context|
-            Aws::Xray::Context.set_current(context)
-            expect(Aws::Xray::Context.current).to be_a(Aws::Xray::Context)
+            Aws::Xray::Context.with_given_context(context) do
+              expect(Aws::Xray::Context.current).to be_a(Aws::Xray::Context)
+            end
           }.join
         }.not_to raise_error
       end
@@ -37,9 +38,10 @@ RSpec.describe Aws::Xray::Context do
         Aws::Xray::Context.current.base_trace do
           threads = 100.times.map do |i|
             Thread.new(Aws::Xray::Context.current.copy) {|context|
-              Aws::Xray::Context.set_current(context)
-              Aws::Xray::Context.current.child_trace(name: i.to_s, remote: false) do |sub|
-                # pass
+              Aws::Xray::Context.with_given_context(context) do
+                Aws::Xray::Context.current.child_trace(name: i.to_s, remote: false) do |sub|
+                  # pass
+                end
               end
             }
           end
