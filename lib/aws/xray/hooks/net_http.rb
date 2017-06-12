@@ -6,7 +6,7 @@ module Aws
       module NetHttp
         NAME_HEADER = 'X-Aws-Xray-Name'.freeze
 
-        def request_with_aws_xray(req, *args)
+        def request_with_aws_xray(req, *args, &block)
           return request_without_aws_xray(req, *args) unless Context.started?
           return request_without_aws_xray(req, *args) if Context.current.disabled?(:net_http)
 
@@ -26,7 +26,7 @@ module Aws
             req[TRACE_HEADER] = propagate_trace.to_header_value
             sub.set_http_request(request_record)
 
-            res = request_without_aws_xray(req, *args)
+            res = request_without_aws_xray(req, *args, &block)
 
             sub.set_http_response(res.code.to_i, res['Content-Length'])
             case res.code.to_i
