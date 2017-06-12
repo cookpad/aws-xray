@@ -103,4 +103,27 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
     server_thread.kill
     client_thread.kill
   end
+
+  it 'returns net_http response even if disabled tracing' do
+    server_thread = build_server_thread
+    client_thread = build_client_thread do
+      Aws::Xray::Context.current.disable_trace(:net_http) do
+        Net::HTTP.start(host, port) do |http|
+          uri = URI("http://#{host}:#{port}/hello")
+          response = http.get(uri, { 'X-Aws-Xray-Name' => 'target-app' })
+          queue.push(response)
+        end
+      end
+    end
+
+    request_string, response, _ = queue.pop, queue.pop, queue.pop
+    expect(request_string).not_to match(/X-Amzn-Trace-Id/)
+    expect(response.code).to eq('200')
+
+    sent_jsons = io.tap(&:rewind).read.split("\n")
+    expect(sent_jsons.size).to eq(2)
+
+    server_thread.kill
+    client_thread.kill
+  end
 end
