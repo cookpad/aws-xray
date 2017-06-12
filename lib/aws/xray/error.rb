@@ -26,9 +26,10 @@ module Aws
       # TODO: Setting cause API. Downstream API's exception?
       # TODO: paths.
       def build_cause_from_exception(e, remote)
-        truncated, stack = build_stack(e, Dir.pwd + '/')
+        working_directory = (Dir.pwd + '/') rescue '/'
+        truncated, stack = build_stack(e, working_directory)
         {
-          working_directory: Dir.pwd,
+          working_directory: working_directory,
           paths: [],
           exceptions: [
             id: SecureRandom.hex(8),

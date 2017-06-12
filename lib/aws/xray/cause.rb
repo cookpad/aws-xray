@@ -5,7 +5,7 @@ module Aws
 
       def initialize(stack: [], message: nil, type: nil)
         @id = SecureRandom.hex(8)
-        @working_directory = Dir.pwd
+        @working_directory = (Dir.pwd + '/') rescue '/'
         @stack = stack
         @message = message
         @type = type

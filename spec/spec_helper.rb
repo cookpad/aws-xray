@@ -4,6 +4,7 @@ $:.unshift File.expand_path('../lib', __dir__)
 require 'aws/xray'
 require 'aws/xray/hooks/all'
 
+require 'fileutils'
 require 'rack/test'
 
 Aws::Xray.config.name = 'test-app'
