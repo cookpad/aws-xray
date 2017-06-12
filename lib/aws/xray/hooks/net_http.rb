@@ -7,8 +7,8 @@ module Aws
         NAME_HEADER = 'X-Aws-Xray-Name'.freeze
 
         def request_with_aws_xray(req, *args, &block)
-          return request_without_aws_xray(req, *args) unless Context.started?
-          return request_without_aws_xray(req, *args) if Context.current.disabled?(:net_http)
+          return request_without_aws_xray(req, *args, &block) unless Context.started?
+          return request_without_aws_xray(req, *args, &block) if Context.current.disabled?(:net_http)
 
           uri = URI('')
           uri.scheme = use_ssl? ? 'https' : 'http'
