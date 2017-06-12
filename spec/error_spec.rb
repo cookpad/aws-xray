@@ -60,5 +60,27 @@ RSpec.describe Aws::Xray::Error do
         expect(e[:stack].size).to be >= 1
       end
     end
+
+    context 'when current working directory has been unlinked' do
+      let(:path) { File.expand_path('../tmp/test_dir', __dir__) }
+
+      around do |ex|
+        FileUtils.mkdir_p(path)
+        Dir.chdir(path)
+        ex.run
+        Dir.chdir(File.expand_path('../', __dir__))
+        FileUtils.rm_rf(path)
+      end
+
+      it 'fallbacks to root directory' do
+        FileUtils.rm_rf(path)
+        h = nil
+        expect {
+          h = described_class.new(false, false, true, exception, false, nil).to_h
+        }.not_to raise_error
+
+        expect(h[:cause][:working_directory]).to eq('/')
+      end
+    end
   end
 end

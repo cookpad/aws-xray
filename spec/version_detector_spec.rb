@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'fileutils'
 
 RSpec.describe Aws::Xray::VersionDetector do
   specify do
