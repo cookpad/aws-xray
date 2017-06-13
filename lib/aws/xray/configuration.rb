@@ -6,19 +6,9 @@ module Aws
   module Xray
     # thread-unsafe, suppose to be used only in initialization phase.
     class Configuration
-      option = ENV['AWS_XRAY_LOCATION']
-      DEFAULT_HOST = option ? option.split(':').first : nil
-      DEFAULT_PORT = option ? Integer(option.split(':').last) : nil
-
-      name_option = ENV['AWS_XRAY_NAME']
-      DEFAULT_NAME = name_option ? name_option : nil
-
-      path_option = ENV['AWS_XRAY_EXCLUDED_PATHS']
-      DEFAULT_EXCLUDED_PATHS = path_option ? path_option.split(',') : []
-
       # @return [String] name Logical service name for this application.
       def name
-        @name ||= DEFAULT_NAME
+        @name ||= ENV['AWS_XRAY_NAME']
       end
       attr_writer :name
 
@@ -27,17 +17,22 @@ module Aws
       #   - port: e.g. 2000
       def client_options
         @client_options ||=
-          if DEFAULT_HOST && DEFAULT_PORT
-            { host: DEFAULT_HOST, port: DEFAULT_PORT }
-          else
-            { sock: NullSocket.new }
+          begin
+            option = (ENV['AWS_XRAY_LOCATION'] || '').split(':')
+            host = option[0]
+            port = option[1]
+            if (host && !host.empty?) && (port && !port.empty?)
+              { host: host, port: Integer(port) }
+            else
+              { sock: NullSocket.new }
+            end
           end
       end
       attr_writer :client_options
 
       # @return [Array<String>]
       def excluded_paths
-        @excluded_paths ||= DEFAULT_EXCLUDED_PATHS
+        @excluded_paths ||= (ENV['AWS_XRAY_EXCLUDED_PATHS'] || '').split(',')
       end
       attr_writer :excluded_paths
 
