@@ -43,6 +43,28 @@ module Aws
         @http_response = Response.new(status, length)
       end
 
+      # Automatically set error according to status code.
+      # @param [Integer] status HTTP status
+      # @param [Integer] length Size of HTTP response body
+      # @param [Boolean] remote Whether the response is from remote server or not.
+      def set_http_response_with_error(status, length, remote:)
+        set_http_response(status, length)
+        type = remote ? 'http_request_error' : 'http_response_error'
+        case status.to_i
+        when 499
+          cause = Cause.new(stack: caller, message: 'Got 499', type: type)
+          set_error(error: true, throttle: true, cause: cause)
+        when 400..498
+          cause = Cause.new(stack: caller, message: 'Got 4xx', type: type)
+          set_error(error: true, cause: cause)
+        when 500..599
+          cause = Cause.new(stack: caller, message: 'Got 5xx', type: type)
+          set_error(fault: true, remote: remote, cause: cause)
+        else
+          # pass
+        end
+      end
+
       # @param [Boolean] error Indicating that a client error occurred (response status code was 4XX Client Error).
       # @param [Boolean] throttle Indicating that a request was throttled (response status code was 429 Too Many Requests).
       # @param [Boolean] fault Indicating that a server error occurred (response status code was 5XX Server Error).
