@@ -30,4 +30,12 @@ RSpec.describe Aws::Xray::Segment do
       expect(segment.to_h[:annotations][:server]).to eq('web-001')
     end
   end
+
+  describe '#add_metadata' do
+    it 'sets metadata' do
+      segment = described_class.build('test-app', trace)
+      segment.add_metadata(server: 'web-001')
+      expect(segment.to_h[:metadata][:server]).to eq('web-001')
+    end
+  end
 end
