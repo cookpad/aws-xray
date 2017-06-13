@@ -124,8 +124,9 @@ Tracing context is thread local. To pass current tracing context, copy current t
 
 ```ruby
 Thread.new(Aws::Xray::Context.current.copy) do |context|
-  Aws::Xray::Context.set_current(context)
-  # Do something
+  Aws::Xray::Context.with_given_context(context) do
+    # Do something
+  end
 end
 ```
 
