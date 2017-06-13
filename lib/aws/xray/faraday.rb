@@ -23,20 +23,7 @@ module Aws
 
           res = Context.current.disable_trace(:net_http) { @app.call(req_env) }
           res.on_complete do |res_env|
-            sub.set_http_response(res_env.status, res_env.response_headers['Content-Length'])
-            case res_env.status
-            when 499
-              cause = Cause.new(stack: caller, message: 'Got 499', type: 'http_request_error')
-              sub.set_error(error: true, throttle: true, cause: cause)
-            when 400..498
-              cause = Cause.new(stack: caller, message: 'Got 4xx', type: 'http_request_error')
-              sub.set_error(error: true, cause: cause)
-            when 500..599
-              cause = Cause.new(stack: caller, message: 'Got 5xx', type: 'http_request_error')
-              sub.set_error(fault: true, remote: true, cause: cause)
-            else
-              # pass
-            end
+            sub.set_http_response_with_error(res_env.status, res_env.response_headers['Content-Length'], remote: true)
           end
         end
       end

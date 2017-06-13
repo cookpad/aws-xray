@@ -28,21 +28,7 @@ module Aws
 
             res = request_without_aws_xray(req, *args, &block)
 
-            sub.set_http_response(res.code.to_i, res['Content-Length'])
-            case res.code.to_i
-            when 499
-              cause = Cause.new(stack: caller, message: 'Got 499', type: 'http_request_error')
-              sub.set_error(error: true, throttle: true, cause: cause)
-            when 400..498
-              cause = Cause.new(stack: caller, message: 'Got 4xx', type: 'http_request_error')
-              sub.set_error(error: true, cause: cause)
-            when 500..599
-              cause = Cause.new(stack: caller, message: 'Got 5xx', type: 'http_request_error')
-              sub.set_error(fault: true, remote: true, cause: cause)
-            else
-              # pass
-            end
-
+            sub.set_http_response_with_error(res.code.to_i, res['Content-Length'], remote: true)
             res
           end
         end
