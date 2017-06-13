@@ -88,29 +88,79 @@ RSpec.describe Aws::Xray::Rack do
   end
 
   describe 'error tracing' do
-    let(:test_error) { Class.new(StandardError) }
-    let(:app) { ->(_) { raise test_error } }
+    context 'the rack app raised an error' do
+      let(:test_error) { Class.new(StandardError) }
+      let(:app) { ->(_) { raise test_error } }
 
-    it 'calls original app and adds formated trace header value and sends base segment' do
-      stack = described_class.new(app, client_options: { sock: io })
-      expect { stack.call(env) }.to raise_error(test_error)
+      it 'calls original app and adds formated trace header value and sends base segment' do
+        stack = described_class.new(app, client_options: { sock: io })
+        expect { stack.call(env) }.to raise_error(test_error)
 
-      io.rewind
-      sent_jsons = io.read.split("\n")
-      expect(sent_jsons.size).to eq(2)
-      _, body_json = *sent_jsons
+        io.rewind
+        sent_jsons = io.read.split("\n")
+        expect(sent_jsons.size).to eq(2)
+        _, body_json = *sent_jsons
 
-      body = JSON.parse(body_json)
-      expect(body['name']).to eq('test-app')
-      expect(body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
-      expect(body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
-      expect(body['parent_id']).to eq('53995c3f42cd8ad8')
+        body = JSON.parse(body_json)
+        expect(body['name']).to eq('test-app')
+        expect(body['id']).to match(/\A[0-9a-fA-F]{16}\z/)
+        expect(body['trace_id']).to eq('1-67891233-abcdef012345678912345678')
+        expect(body['parent_id']).to eq('53995c3f42cd8ad8')
 
-      expect(body['error']).to eq(false)
-      expect(body['throttle']).to eq(false)
-      expect(body['fault']).to eq(true)
-      expect(body['cause']).to be_a(Hash)
-      expect(body['cause']).not_to be_empty
+        expect(body['error']).to eq(false)
+        expect(body['throttle']).to eq(false)
+        expect(body['fault']).to eq(true)
+        expect(body['cause']).to be_a(Hash)
+        expect(body['cause']).not_to be_empty
+      end
+    end
+
+    context 'the rack app responded an error' do
+      let(:test_error) { Class.new(StandardError) }
+      let(:app) do
+        builder = Rack::Builder.new
+        builder.use described_class, client_options: { sock: io }
+        builder.use Class.new {
+          def initialize(app); @app = app; end
+          def call(env)
+            @app.call
+          rescue
+            [500, {}, ['error']]
+          end
+        }
+        builder.run ->(_) { raise test_error.new('test error') }
+        builder
+      end
+
+      it 'marks the segment as a error' do
+        get '/', {}, env
+
+        expect(last_response.status).to eq(500)
+        expect(last_response.body).to eq('error')
+        expect(last_response.headers).to include(
+          'X-Amzn-Trace-Id' => 'Root=1-67891233-abcdef012345678912345678;Sampled=1;Parent=53995c3f42cd8ad8'
+        )
+
+        io.rewind
+        sent_jsons = io.read.split("\n")
+        expect(sent_jsons.size).to eq(2)
+
+        body = JSON.parse(sent_jsons[1])
+        expect(body['name']).to eq('test-app')
+        expect(body['error']).to eq(false)
+        expect(body['throttle']).to eq(false)
+        expect(body['fault']).to eq(true)
+        expect(body['cause']['exceptions'].size).to eq(1)
+
+        e = body['cause']['exceptions'].first
+        expect(e['message']).to eq('Got 5xx')
+        expect(e['type']).to eq('http_response_error')
+        expect(e['remote']).to eq(false)
+        expect(e['truncated']).to be >= 0
+        expect(e['skipped']).to be_nil
+        expect(e['cause']).to be_nil
+        expect(e['stack'].size).to be >= 1
+      end
     end
   end
 
