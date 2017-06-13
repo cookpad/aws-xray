@@ -133,11 +133,11 @@ RSpec.describe Aws::Xray::Rack do
       end
 
       it 'marks the segment as a error' do
-        get '/', {}, env
+        get '/'
 
         expect(last_response.status).to eq(500)
         expect(last_response.body).to eq('error')
-        expect(last_response.headers).to include(
+        expect(last_response.headers).not_to include(
           'X-Amzn-Trace-Id' => 'Root=1-67891233-abcdef012345678912345678;Sampled=1;Parent=53995c3f42cd8ad8'
         )
 
