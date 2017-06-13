@@ -125,11 +125,59 @@ RSpec.describe Aws::Xray::Faraday do
     end
 
     context '499' do
-      # TODO
+      let(:stubs) do
+        Faraday::Adapter::Test::Stubs.new do |stub|
+          stub.get('/foo') { |env| [499, {}, 'fault'] }
+        end
+      end
+
+      it 'traces remote fault' do
+        res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
+          Aws::Xray::Context.current.base_trace do
+            client.get('/foo')
+          end
+        end
+        expect(res.status).to eq(499)
+
+        sent_jsons = io.tap(&:rewind).read.split("\n")
+        body = JSON.parse(sent_jsons[1])
+
+        expect(body['error']).to eq(true)
+        expect(body['throttle']).to eq(true)
+        expect(body['fault']).to eq(false)
+
+        e = body['cause']['exceptions'].first
+        expect(e['message']).to eq('Got 499')
+        expect(e['remote']).to eq(true)
+      end
     end
 
     context '4xx' do
-      # TODO
+      let(:stubs) do
+        Faraday::Adapter::Test::Stubs.new do |stub|
+          stub.get('/foo') { |env| [400, {}, 'fault'] }
+        end
+      end
+
+      it 'traces remote fault' do
+        res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
+          Aws::Xray::Context.current.base_trace do
+            client.get('/foo')
+          end
+        end
+        expect(res.status).to eq(400)
+
+        sent_jsons = io.tap(&:rewind).read.split("\n")
+        body = JSON.parse(sent_jsons[1])
+
+        expect(body['error']).to eq(true)
+        expect(body['throttle']).to eq(false)
+        expect(body['fault']).to eq(false)
+
+        e = body['cause']['exceptions'].first
+        expect(e['message']).to eq('Got 4xx')
+        expect(e['remote']).to eq(true)
+      end
     end
   end
 

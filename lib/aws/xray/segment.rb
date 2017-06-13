@@ -53,10 +53,10 @@ module Aws
         case status.to_i
         when 499
           cause = Cause.new(stack: caller, message: 'Got 499', type: type)
-          set_error(error: true, throttle: true, cause: cause)
+          set_error(error: true, remote: remote, throttle: true, cause: cause)
         when 400..498
           cause = Cause.new(stack: caller, message: 'Got 4xx', type: type)
-          set_error(error: true, cause: cause)
+          set_error(error: true, remote: remote, cause: cause)
         when 500..599
           cause = Cause.new(stack: caller, message: 'Got 5xx', type: type)
           set_error(fault: true, remote: remote, cause: cause)
