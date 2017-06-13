@@ -1,6 +1,7 @@
 # aws-xray
 [![Build Status](https://travis-ci.org/taiki45/aws-xray.svg?branch=master)](https://travis-ci.org/taiki45/aws-xray)
 [![Gem Version](https://badge.fury.io/rb/aws-xray.svg)](https://badge.fury.io/rb/aws-xray)
+[![Coverage Status](https://coveralls.io/repos/github/taiki45/aws-xray/badge.svg)](https://coveralls.io/github/taiki45/aws-xray)
 
 The unofficial AWS X-Ray Tracing SDK for Ruby.
 It enables you to capture in-coming HTTP requests and out-going HTTP requests and send them to xray-agent automatically.
