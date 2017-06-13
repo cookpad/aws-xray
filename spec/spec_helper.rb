@@ -1,4 +1,6 @@
 require 'pry'
+require 'coveralls'
+Coveralls.wear!
 
 $:.unshift File.expand_path('../lib', __dir__)
 require 'aws/xray'
