@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'rack-timeout'
 
 RSpec.describe Aws::Xray::Rack do
   include Rack::Test::Methods
@@ -158,6 +159,38 @@ RSpec.describe Aws::Xray::Rack do
         expect(e['remote']).to eq(false)
         expect(e['truncated']).to be >= 0
         expect(e['skipped']).to be_nil
+        expect(e['cause']).to be_nil
+        expect(e['stack'].size).to be >= 1
+      end
+    end
+
+    context 'when timeout with rack-timeout' do
+      let(:app) do
+        builder = Rack::Builder.new
+        builder.use Rack::Timeout, service_timeout: 0.01
+        builder.use described_class, client_options: { sock: io }
+        builder.run ->(_) { sleep 0.03 }
+        builder
+      end
+
+      it 'marks the segment as a error' do
+        expect { get '/' }.to raise_error(Rack::Timeout::RequestTimeoutError)
+
+        sent_jsons = io.tap(&:rewind).read.split("\n")
+        expect(sent_jsons.size).to eq(2)
+
+        body = JSON.parse(sent_jsons[1])
+        expect(body['name']).to eq('test-app')
+        expect(body['fault']).to eq(true)
+        expect(body['error']).to eq(false)
+        expect(body['throttle']).to eq(false)
+        expect(body['cause']['exceptions'].size).to eq(1)
+
+        e = body['cause']['exceptions'].first
+        expect(e['type']).to eq('Rack::Timeout::RequestTimeoutException')
+        expect(e['remote']).to eq(false)
+        expect(e['truncated']).to be >= 0
+        expect(e['skipped']).to be >= 0
         expect(e['cause']).to be_nil
         expect(e['stack'].size).to be >= 1
       end

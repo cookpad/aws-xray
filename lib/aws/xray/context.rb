@@ -86,8 +86,8 @@ module Aws
         self.class.new(@name.dup, @client.copy, @trace.copy, @base_segment_id ? @base_segment_id.dup : nil)
       end
 
-      # Rescue standard errors and record the error to the segment.
-      # Then re-raise the error.
+      # Rescue all exceptions and record the exception to the segment.
+      # Then re-raise the exception.
       #
       # @yield [Aws::Xray::Segment]
       # @return [Object] A value which given block returns.
@@ -97,7 +97,7 @@ module Aws
 
         begin
           yield base_segment
-        rescue => e
+        rescue Exception => e
           base_segment.set_error(fault: true, e: e)
           raise e
         ensure
@@ -106,9 +106,6 @@ module Aws
         end
       end
 
-      # Rescue standard errors and record the error to the sub segment.
-      # Then re-raise the error.
-      #
       # @param [Boolean] remote
       # @param [String] name Arbitrary name of the sub segment. e.g. "funccall_f".
       # @yield [Aws::Xray::SubSegment]
@@ -119,7 +116,7 @@ module Aws
 
         begin
           yield sub
-        rescue => e
+        rescue Exception => e
           sub.set_error(fault: true, e: e)
           raise e
         ensure
