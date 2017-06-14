@@ -20,5 +20,16 @@ Error: #{error}
         EOS
       end
     end
+
+    # Must be configured sentry-raven gem.
+    class ErrorHandlerWithSentry
+      def call(error, payload, host:, port:)
+        if defined?(Raven)
+          ::Raven.capture_exception(error)
+        else
+          $stderr.puts('ErrorHandlerWithSentry is configured but `Raven` is undefined.')
+        end
+      end
+    end
   end
 end
