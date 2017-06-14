@@ -10,6 +10,15 @@ RSpec.describe Aws::Xray::Client do
     let(:segment) { double('segment', to_json: payload.to_json) }
     let(:payload) { { 'id' => 'abc' } }
 
+    # Because rspec changes `$stderr` to StringIO.
+    let(:io) { StringIO.new }
+    around do |ex|
+      back = Aws::Xray.config.segment_sending_error_handler
+      Aws::Xray.config.segment_sending_error_handler = Aws::Xray::DefaultErrorHandler.new(io)
+      ex.run
+      Aws::Xray.config.segment_sending_error_handler = back
+    end
+
     context 'success case' do
       it 'sends given segment' do
         s = build_server
@@ -35,21 +44,24 @@ RSpec.describe Aws::Xray::Client do
         s = build_server
         client = described_class.new(host: '127.0.0.1', port: s.addr[1])
 
-        expect { client.send_segment(segment) }.to output(/Failed to send a segment/).to_stderr
+        client.send_segment(segment)
+        expect(io.tap(&:rewind).read).to match(/Failed to send a segment/)
       end
     end
 
     context 'when invalid hostname is specified' do
       it 'ignores socket errors' do
         client = described_class.new(host: 'aws-xray-gem-invalid-host-name', port: 8000)
-        expect { client.send_segment(segment) }.to output(/Failed to send a segment/).to_stderr
+        client.send_segment(segment)
+        expect(io.tap(&:rewind).read).to match(/Failed to send a segment/)
       end
     end
 
     context 'when invalid port is specified' do
       it 'ignores socket errors' do
         client = described_class.new(host: '127.0.0.1', port: 0)
-        expect { client.send_segment(segment) }.to output(/Failed to send a segment/).to_stderr
+        client.send_segment(segment)
+        expect(io.tap(&:rewind).read).to match(/Failed to send a segment/)
       end
     end
   end

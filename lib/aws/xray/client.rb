@@ -25,13 +25,7 @@ module Aws
           len = sock.send(payload, 0, @host, @port)
           $stderr.puts("Can not send all bytes: #{len} sent") if payload.size != len
         rescue SystemCallError, SocketError => e
-          $stderr.puts(<<-EOS)
-Failed to send a segment:
-Segnemt:
-#{payload}
-Error: #{e}
-#{e.backtrace.join("\n")}
-          EOS
+          Aws::Xray.config.segment_sending_error_handler.call(e, payload, host: @host, port: @port)
         ensure
           sock.close
         end
