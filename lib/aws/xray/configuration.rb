@@ -1,6 +1,7 @@
 require 'socket'
 require 'aws/xray/annotation_normalizer'
 require 'aws/xray/version_detector'
+require 'aws/xray/error_handlers'
 
 module Aws
   module Xray
@@ -70,6 +71,12 @@ module Aws
       end
       # @param [Hash] metadata Default metadata.
       attr_writer :default_metadata
+
+      def segment_sending_error_handler
+        @segment_sending_error_handler ||= DefaultErrorHandler.new($stderr)
+      end
+      # @param [Proc] segment_sending_error_handler Callable object
+      attr_writer :segment_sending_error_handler
     end
   end
 end
