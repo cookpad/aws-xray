@@ -176,6 +176,22 @@ Aws::Xray.config.default_metadata = Aws::Xray.config.default_metadata.merge(key:
 
 Note: See official document about annotation and metadata in AWS X-Ray.
 
+### Error handlers
+When aws-xray fails to send segments due to system call errors, it logs errors to stderr by default.
+If you want to track these errors, for example with Sentry, you can configure your own error handler:
+
+```ruby
+Aws::Xray.config.segment_sending_error_handler = MyCustomErrorHandler.new
+```
+
+The error handler must be callable object and receive 2 arguments and 2 keyword arguments. See `Aws::Xray::DefaultErrorHandler` more detail.
+
+Optionaly, aws-xray offers an error handler which integrats with Sentry. To use it:
+
+```ruby
+Aws::Xray.config.segment_sending_error_handler = ErrorHandlerWithSentry.new
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
