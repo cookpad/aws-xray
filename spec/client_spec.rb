@@ -64,5 +64,19 @@ RSpec.describe Aws::Xray::Client do
         expect(io.tap(&:rewind).read).to match(/Failed to send a segment/)
       end
     end
+
+    context 'when error handler raises errors' do
+      around do |ex|
+        back = Aws::Xray.config.segment_sending_error_handler
+        Aws::Xray.config.segment_sending_error_handler = -> (*) { raise 'test error' }
+        ex.run
+        Aws::Xray.config.segment_sending_error_handler = back
+      end
+
+      it 'rescues the error and log them' do
+        client = described_class.new(host: '127.0.0.1', port: 0)
+        expect { client.send_segment(segment) }.to output(/test error/).to_stderr
+      end
+    end
   end
 end

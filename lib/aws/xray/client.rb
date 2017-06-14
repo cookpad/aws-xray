@@ -25,7 +25,11 @@ module Aws
           len = sock.send(payload, 0, @host, @port)
           $stderr.puts("Can not send all bytes: #{len} sent") if payload.size != len
         rescue SystemCallError, SocketError => e
-          Aws::Xray.config.segment_sending_error_handler.call(e, payload, host: @host, port: @port)
+          begin
+            Aws::Xray.config.segment_sending_error_handler.call(e, payload, host: @host, port: @port)
+          rescue Exception => e
+            $stderr.puts("Error handler `#{Aws::Xray.config.segment_sending_error_handler}` raised an error: #{e}\n#{e.backtrace.join("\n")}")
+          end
         ensure
           sock.close
         end
