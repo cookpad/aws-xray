@@ -189,7 +189,7 @@ The error handler must be callable object and receive 2 arguments and 2 keyword 
 Optionaly, aws-xray offers an error handler which integrats with Sentry. To use it:
 
 ```ruby
-Aws::Xray.config.segment_sending_error_handler = ErrorHandlerWithSentry.new
+Aws::Xray.config.segment_sending_error_handler = Aws::Xray::ErrorHandlerWithSentry.new
 ```
 
 ## Development
