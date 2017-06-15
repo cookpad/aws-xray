@@ -1,4 +1,5 @@
 require 'aws/xray/version'
+require 'aws/xray/errors'
 require 'aws/xray/rack'
 require 'aws/xray/faraday'
 require 'aws/xray/configuration'
@@ -7,12 +8,6 @@ require 'aws/xray/sockets'
 module Aws
   module Xray
     TRACE_HEADER = 'X-Amzn-Trace-Id'.freeze
-
-    class MissingNameError < ::StandardError
-      def initialize
-        super("`name` is empty. Configure this with `Aws::Xray.config.name = 'my-app'`.")
-      end
-    end
 
     @config = Configuration.new
     class << self

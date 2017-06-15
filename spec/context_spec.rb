@@ -13,7 +13,7 @@ RSpec.describe Aws::Xray::Context do
         expect(Aws::Xray::Context.current).to be_a(Aws::Xray::Context)
         expect {
           Thread.new { Aws::Xray::Context.current }.join
-        }.to raise_error(Aws::Xray::Context::NotSetError)
+        }.to raise_error(Aws::Xray::NotSetError)
       end
     end
 
