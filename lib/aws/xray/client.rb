@@ -21,7 +21,11 @@ module Aws
         payload = %!{"format": "json", "version": 1}\n#{segment.to_json}\n!
 
         begin
-          Worker.post(payload, self.copy)
+          if @sock # test env or not aws-xray is not enabled
+            send_payload(payload)
+          else # production env
+            Worker.post(payload, self.copy)
+          end
         rescue QueueIsFullError => e
           begin
             Aws::Xray.config.segment_sending_error_handler.call(e, payload, host: @host, port: @port)
