@@ -22,7 +22,7 @@ module Aws
         sock = @sock || UDPSocket.new
 
         begin
-          len = sock.send(payload, 0, @host, @port)
+          len = sock.send(payload, Socket::MSG_DONTWAIT, @host, @port)
           $stderr.puts("Can not send all bytes: #{len} sent") if payload.size != len
         rescue SystemCallError, SocketError => e
           begin
