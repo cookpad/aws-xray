@@ -1,9 +1,15 @@
 require 'aws/xray/version'
 require 'aws/xray/errors'
-require 'aws/xray/rack'
-require 'aws/xray/faraday'
+require 'aws/xray/trace'
+require 'aws/xray/client'
+require 'aws/xray/context'
+require 'aws/xray/worker'
+
 require 'aws/xray/configuration'
 require 'aws/xray/sockets'
+
+require 'aws/xray/rack'
+require 'aws/xray/faraday'
 
 module Aws
   module Xray

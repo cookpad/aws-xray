@@ -19,6 +19,25 @@ module Aws
       # @param [Aws::Xray::Segment] segment
       def send_segment(segment)
         payload = %!{"format": "json", "version": 1}\n#{segment.to_json}\n!
+
+        begin
+          if @sock # test env or not aws-xray is not enabled
+            send_payload(payload)
+          else # production env
+            Worker.post(payload, self.copy)
+          end
+        rescue QueueIsFullError => e
+          begin
+            Aws::Xray.config.segment_sending_error_handler.call(e, payload, host: @host, port: @port)
+          rescue Exception => e
+            $stderr.puts("Error handler `#{Aws::Xray.config.segment_sending_error_handler}` raised an error: #{e}\n#{e.backtrace.join("\n")}")
+          end
+        end
+      end
+
+      # Will be called in other threads.
+      # @param [String] payload
+      def send_payload(payload)
         sock = @sock || UDPSocket.new
 
         begin
