@@ -26,5 +26,14 @@ module Aws
         super("Can not send all bytes: expected #{payload_len} but #{sent_len} sent")
       end
     end
+
+    class QueueIsFullError < BaseError
+      attr_reader :error
+
+      def initialize(error)
+        @error = error
+        super('The queue exceeds max size')
+      end
+    end
   end
 end

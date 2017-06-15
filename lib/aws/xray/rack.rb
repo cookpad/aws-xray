@@ -1,7 +1,3 @@
-require 'aws/xray/trace'
-require 'aws/xray/client'
-require 'aws/xray/context'
-
 module Aws
   module Xray
     class Rack

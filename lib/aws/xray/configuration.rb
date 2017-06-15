@@ -77,6 +77,19 @@ module Aws
       end
       # @param [Proc] segment_sending_error_handler Callable object
       attr_writer :segment_sending_error_handler
+
+      # @return [Aws::Xray::Worker::Configuration]
+      def worker
+        @worker ||= Aws::Xray::Worker::Configuration.new
+      end
+      # Set given configuration and reset workers according to the given
+      # configuration.
+      # @param [Aws::Xray::Worker::Configuration] conf
+      def worker=(conf)
+        @worker = conf
+        Aws::Xray::Worker.reset(conf)
+        conf
+      end
     end
   end
 end

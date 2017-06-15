@@ -25,6 +25,7 @@ RSpec.describe Aws::Xray::Client do
         client = described_class.new(host: '127.0.0.1', port: s.addr[1])
 
         client.send_segment(segment)
+        Thread.pass
 
         sent = s.recvfrom(1024)[0]
         expect(sent.split("\n").size).to eq(2)
@@ -73,6 +74,16 @@ RSpec.describe Aws::Xray::Client do
         client = described_class.new(sock: sock)
         client.send_segment(segment)
         expect(io.tap(&:rewind).read).to match(/Can not send all bytes/)
+      end
+    end
+
+    context 'when queue is full' do
+      before { allow(Aws::Xray::Worker::Item).to receive(:new).and_raise(ThreadError) }
+
+      it 'raises QueueIsFullError' do
+        client = described_class.new(host: '127.0.0.1', port: 0)
+        client.send_segment(segment); sleep 0.01;
+        expect(io.tap(&:rewind).read).to match(/The queue exceeds max size/)
       end
     end
 
