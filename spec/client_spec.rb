@@ -54,14 +54,6 @@ RSpec.describe Aws::Xray::Client do
       end
     end
 
-    context 'when invalid hostname is specified' do
-      it 'ignores socket errors' do
-        client = described_class.new(host: 'aws-xray-gem-invalid-host-name', port: 8000)
-        client.send_segment(segment); wait;
-        expect(io.tap(&:rewind).read).to match(/Failed to send a segment/)
-      end
-    end
-
     context 'when invalid port is specified' do
       it 'ignores socket errors' do
         client = described_class.new(host: '127.0.0.1', port: 0)
