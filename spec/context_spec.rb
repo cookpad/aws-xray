@@ -48,6 +48,7 @@ RSpec.describe Aws::Xray::Context do
           threads.each(&:join)
         end
       end
+      Thread.pass; sleep 0.001;
 
       Timeout::timeout(5) do
         names = []
@@ -55,7 +56,7 @@ RSpec.describe Aws::Xray::Context do
           header, body = server.recvfrom(1024 * 1024)[0].split("\n").map {|e| JSON.parse(e) }
           expect(header).to eq({'format' => 'json', 'version' => 1})
           name = body['name']
-          expect(name).to match(/\A\d+\z/)
+          expect(name).to match(/\A(\d+|test-app)\z/)
           expect(names).not_to include(name)
           names << name
         end

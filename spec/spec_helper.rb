@@ -11,6 +11,7 @@ require 'rack/test'
 
 Aws::Xray.config.name = 'test-app'
 Aws::Xray.config.version = -> { 'deadbeef' }
+Aws::Xray.config.worker = Aws::Xray::Worker::Configuration.new(num: 1)
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
