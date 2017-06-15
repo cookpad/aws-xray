@@ -65,6 +65,17 @@ RSpec.describe Aws::Xray::Client do
       end
     end
 
+    context 'when can not send all bytes' do
+      let(:sock) { double('sock', close: nil) }
+      before { allow(sock).to receive(:send).and_return(0) }
+
+      it 'raises CanNotSendAllByteError' do
+        client = described_class.new(sock: sock)
+        client.send_segment(segment)
+        expect(io.tap(&:rewind).read).to match(/Can not send all bytes/)
+      end
+    end
+
     context 'when error handler raises errors' do
       around do |ex|
         back = Aws::Xray.config.segment_sending_error_handler

@@ -20,5 +20,11 @@ module Aws
         super("`name` is empty. Configure this with `Aws::Xray.config.name = 'my-app'`.")
       end
     end
+
+    class CanNotSendAllByteError < BaseError
+      def initialize(payload_len, sent_len)
+        super("Can not send all bytes: expected #{payload_len} but #{sent_len} sent")
+      end
+    end
   end
 end
