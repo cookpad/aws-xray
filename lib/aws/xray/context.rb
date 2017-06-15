@@ -6,20 +6,6 @@ module Aws
     class Context
       VAR_NAME = :_aws_xray_context_
 
-      class BaseError < ::StandardError; end
-
-      class NotSetError < BaseError
-        def initialize
-          super('Context is not set for this thread')
-        end
-      end
-
-      class SegmentDidNotStartError < BaseError
-        def initialize
-          super('Segment did not start yet')
-        end
-      end
-
       class << self
         # @return [Aws::Xray::Context]
         def current
