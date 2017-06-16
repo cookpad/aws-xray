@@ -15,6 +15,12 @@ bundle install
 bundle exec foreman start
 ```
 
+Then try:
+
+```
+curl localhost:3000/
+```
+
 ## Running with xray-agent
 Follow official document to install xray-agent: http://docs.aws.amazon.com/xray/latest/devguide/xray-daemon.html
 
