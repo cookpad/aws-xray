@@ -1,3 +1,4 @@
+require 'aws/xray'
 require 'net/http'
 
 module Aws
