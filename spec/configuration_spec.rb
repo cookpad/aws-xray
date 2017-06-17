@@ -44,6 +44,14 @@ RSpec.describe Aws::Xray::Configuration do
       end
     end
 
+    context 'when doueble quotes are given' do
+      let(:location) { '""' }
+
+      it 'returns default one' do
+        expect(Aws::Xray::Configuration.new.client_options).to match(sock: be_a(Aws::Xray::NullSocket))
+      end
+    end
+
     context 'when nothing is given' do
       let(:location) { nil }
 
