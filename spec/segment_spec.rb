@@ -20,6 +20,8 @@ RSpec.describe Aws::Xray::Segment do
       segment.finish
       expect(segment.to_h.has_key?(:in_progress)).to eq(false)
       expect(segment.to_h.has_key?(:end_time)).to eq(true)
+
+      SegmentValidator.call(segment.to_json)
     end
   end
 

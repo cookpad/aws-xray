@@ -66,6 +66,8 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
     expect(request_part['user_agent']).to match(/Ruby/)
     expect(body['http']['response']['status']).to eq(200)
 
+    SegmentValidator.call(body.to_json)
+
     server_thread.kill
     client_thread.kill
   end
@@ -99,6 +101,8 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
     expect(request_part['url']).to eq("http://#{host}:#{port}/hello")
     expect(request_part['user_agent']).to match(/Ruby/)
     expect(body['http']['response']['status']).to eq(200)
+
+    SegmentValidator.call(body.to_json)
 
     server_thread.kill
     client_thread.kill

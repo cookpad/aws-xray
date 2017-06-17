@@ -13,6 +13,19 @@ Aws::Xray.config.name = 'test-app'
 Aws::Xray.config.version = -> { 'deadbeef' }
 Aws::Xray.config.worker = Aws::Xray::Worker::Configuration.new(num: 1)
 
+require 'json-schema'
+# Json schema for `cause` object is invalid now.
+# We don't have to set `cause` and `skipped` but it requires them.
+# So we can't use json schema validation if segment contains errors.
+module SegmentValidator
+  path = File.expand_path('schema/xray-segmentdocument-schema-v1.0.0.json', __dir__)
+  @schema = JSON.parse(File.read(path))
+
+  def self.call(json)
+    JSON::Validator.validate!(@schema, json)
+  end
+end
+
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
