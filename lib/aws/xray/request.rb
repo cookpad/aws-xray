@@ -55,6 +55,10 @@ module Aws
           str
         end
       end
+
+      def to_h
+        super.delete_if {|_, v| v.nil? }
+      end
     end
   end
 end
