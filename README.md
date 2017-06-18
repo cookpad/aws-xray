@@ -16,6 +16,7 @@ AWS X-Ray is a ditributed tracing system. See more detail about AWS X-Ray at [of
 - Tracing HTTP request/response.
 - Tracing errors.
 - Annotation and metadata support.
+- Sampling support.
 
 ## Installation
 
@@ -140,6 +141,17 @@ For that case, pass `AWS_XRAY_LOCATION` environment variable to container to spe
 
 ```bash
 docker run --link xray:xray --env AWS_XRAY_LOCATION=xray:2000 my-application
+```
+
+### Sampling
+Sampling rate should be a float within 0 to 1. Both 0 and 1 are acceptable.
+e.g. 0 means never sampled, 1 means always sampled, 0.3 means 30% of requests (or traces in not Rack app) will be sampled.
+The default sampling rate is `0.001`, which means 0.1% of requests will be sampled.
+
+Set sampling rate with `AWS_XRAY_SAMPLING_RATE` env var or:
+
+```ruby
+Aws::Xray.config.sampling_rate = 0.1
 ```
 
 ### Excluded paths
