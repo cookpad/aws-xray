@@ -90,6 +90,14 @@ module Aws
         Aws::Xray::Worker.reset(conf)
         conf
       end
+
+      # Default is 0.1%.
+      # @return [Float]
+      def sampling_rate
+        @sampling_rate ||= Float(ENV['AWS_XRAY_SAMPLING_RATE'] || 0.001)
+      end
+      # @param [Float] sampling_rate
+      attr_writer :sampling_rate
     end
   end
 end

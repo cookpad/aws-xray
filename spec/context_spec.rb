@@ -4,8 +4,36 @@ require 'timeout'
 RSpec.describe Aws::Xray::Context do
   let(:trace) { Aws::Xray::Trace.generate }
 
+  describe 'sampling' do
+    let(:client) { double('client') }
+
+    context 'when not sampled' do
+      let(:trace) { Aws::Xray::Trace.new(sampled: false, root: '') }
+
+      it 'does not send segments' do
+        expect(client).not_to receive(:send_segment)
+
+        Aws::Xray::Context.with_new_context('test-app', client, trace) do
+          Aws::Xray::Context.current.base_trace {}
+        end
+      end
+    end
+
+    context 'when sampled' do
+      let(:trace) { Aws::Xray::Trace.new(sampled: true, root: '') }
+
+      it 'sends segments' do
+        expect(client).to receive(:send_segment)
+
+        Aws::Xray::Context.with_new_context('test-app', client, trace) do
+          Aws::Xray::Context.current.base_trace {}
+        end
+      end
+    end
+  end
+
   describe 'thread safety' do
-    let(:client) { double(:client, send: nil) }
+    let(:client) { double(:client) }
     before { allow(client).to receive(:copy).and_return(client) }
 
     specify 'a context is not shared between threads' do
