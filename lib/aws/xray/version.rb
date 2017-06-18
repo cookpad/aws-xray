@@ -1,5 +1,5 @@
 module Aws
   module Xray
-    VERSION = '0.18.0.beta3'
+    VERSION = '0.19.0.beta1'
   end
 end
