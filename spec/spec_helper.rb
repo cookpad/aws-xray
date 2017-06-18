@@ -12,6 +12,7 @@ require 'rack/test'
 Aws::Xray.config.name = 'test-app'
 Aws::Xray.config.version = -> { 'deadbeef' }
 Aws::Xray.config.worker = Aws::Xray::Worker::Configuration.new(num: 1)
+Aws::Xray.config.sampling_rate = 1
 
 require 'json-schema'
 # Json schema for `cause` object is invalid now.

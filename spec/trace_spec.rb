@@ -27,4 +27,91 @@ RSpec.describe Aws::Xray::Trace do
       expect(epoch.to_i(16)).to eq(now.to_i)
     end
   end
+
+  describe 'sampling' do
+
+    context 'when Sampled=0' do
+      let(:header_value) { 'Sampled=0' }
+
+      it 'follows header value' do
+        100.times do
+          trace = described_class.build_from_header_value(header_value)
+          expect(trace.sampled?).to eq(false)
+        end
+      end
+    end
+
+    context 'when Sampled=1' do
+      let(:header_value) { 'Sampled=1' }
+
+      it 'follows header value' do
+        100.times do
+          trace = described_class.build_from_header_value(header_value)
+          expect(trace.sampled?).to eq(true)
+        end
+      end
+    end
+
+    context 'when no Sampled value' do
+      it 'decides sampled or not with configuration' do
+        100.times do
+          allow(Aws::Xray.config).to receive(:sampling_rate).and_return(0)
+          trace = described_class.build_from_header_value('')
+          expect(trace.sampled?).to eq(false)
+
+          allow(Aws::Xray.config).to receive(:sampling_rate).and_return(1)
+          trace = described_class.build_from_header_value('')
+          expect(trace.sampled?).to eq(true)
+        end
+      end
+    end
+
+    context 'when Sampled=abc' do
+      let(:header_value) { 'Sampled=abc' }
+
+      it 'decides sampled or not with configuration' do
+        100.times do
+          allow(Aws::Xray.config).to receive(:sampling_rate).and_return(0)
+          trace = described_class.build_from_header_value(header_value)
+          expect(trace.sampled?).to eq(false)
+
+          allow(Aws::Xray.config).to receive(:sampling_rate).and_return(1)
+          trace = described_class.build_from_header_value(header_value)
+          expect(trace.sampled?).to eq(true)
+        end
+      end
+    end
+
+    context 'when Sampled=' do
+      let(:header_value) { 'Sampled=' }
+
+      it 'decides sampled or not with configuration' do
+        100.times do
+          allow(Aws::Xray.config).to receive(:sampling_rate).and_return(0)
+          trace = described_class.build_from_header_value(header_value)
+          expect(trace.sampled?).to eq(false)
+
+          allow(Aws::Xray.config).to receive(:sampling_rate).and_return(1)
+          trace = described_class.build_from_header_value(header_value)
+          expect(trace.sampled?).to eq(true)
+        end
+      end
+    end
+
+    context 'when Sampled=true' do
+      let(:header_value) { 'Sampled=true' }
+
+      it 'decides sampled or not with configuration' do
+        100.times do
+          allow(Aws::Xray.config).to receive(:sampling_rate).and_return(0)
+          trace = described_class.build_from_header_value(header_value)
+          expect(trace.sampled?).to eq(false)
+
+          allow(Aws::Xray.config).to receive(:sampling_rate).and_return(1)
+          trace = described_class.build_from_header_value(header_value)
+          expect(trace.sampled?).to eq(true)
+        end
+      end
+    end
+  end
 end

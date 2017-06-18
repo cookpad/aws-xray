@@ -13,10 +13,26 @@ module Aws
         def build_from_header_value(header_value, now = Time.now)
           h = HeaderParser.parse(header_value)
           root = h['Root'] || generate_root(now)
-          new(root: root, sampled: h['Sampled'] != '0', parent: h['Parent'])
+          new(root: root, sampled: decide_sampling(h['Sampled']), parent: h['Parent'])
         end
 
         private
+
+        # Decide sample this request or not. At first, check parent's sampled
+        # and follow the value if it exists. Then decide sampled or not
+        # according to configured sampling_rate.
+        # @param [String,nil] value
+        # @return [Bloolean]
+        def decide_sampling(value)
+          case value
+          when '0'
+            false
+          when '1'
+            true
+          else
+            rand < Aws::Xray.config.sampling_rate
+          end
+        end
 
         def generate_root(now)
           "1-#{now.to_i.to_s(16)}-#{SecureRandom.hex(12)}"
