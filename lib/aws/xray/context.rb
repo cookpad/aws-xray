@@ -88,7 +88,7 @@ module Aws
           raise e
         ensure
           base_segment.finish
-          @client.send_segment(base_segment)
+          @client.send_segment(base_segment) if @trace.sampled?
         end
       end
 
@@ -107,7 +107,7 @@ module Aws
           raise e
         ensure
           sub.finish
-          @client.send_segment(sub)
+          @client.send_segment(sub) if @trace.sampled?
         end
       end
 
