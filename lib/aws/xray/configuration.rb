@@ -7,6 +7,10 @@ module Aws
   module Xray
     # thread-unsafe, suppose to be used only in initialization phase.
     class Configuration
+      def initialize
+        @logger = ::Logger.new($stdout).tap {|l| l.level = Logger::INFO }
+      end
+
       # @return [String] name Logical service name for this application.
       def name
         @name ||= ENV['AWS_XRAY_NAME']
@@ -98,6 +102,10 @@ module Aws
       end
       # @param [Float] sampling_rate
       attr_writer :sampling_rate
+
+      # @param [Logger] logger
+      # @return [Logger]
+      attr_accessor :logger
     end
   end
 end
