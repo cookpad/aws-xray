@@ -108,7 +108,7 @@ module Aws
         end
         if @http_request
           request_hash = @http_request.to_h
-          # traced is SubSegment only
+          # traced is Subsegment only
           request_hash.delete(:traced)
           h[:http] = { request:  request_hash }
         end

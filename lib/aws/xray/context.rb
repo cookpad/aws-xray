@@ -1,5 +1,5 @@
 require 'aws/xray/segment'
-require 'aws/xray/sub_segment'
+require 'aws/xray/subsegment'
 
 module Aws
   module Xray
@@ -58,7 +58,7 @@ module Aws
         @trace = trace
         @base_segment_id = base_segment_id
         @disabled_ids = []
-        @sub_segment_name = nil
+        @subsegment_name = nil
       end
 
       # Curretly context object is thread safe, so copying is not necessary,
@@ -94,11 +94,11 @@ module Aws
 
       # @param [Boolean] remote
       # @param [String] name Arbitrary name of the sub segment. e.g. "funccall_f".
-      # @yield [Aws::Xray::SubSegment]
+      # @yield [Aws::Xray::Subsegment]
       # @return [Object] A value which given block returns.
       def child_trace(remote:, name:)
         raise SegmentDidNotStartError unless @base_segment_id
-        sub = SubSegment.build(@trace, @base_segment_id, remote: remote, name: overwrite_name(name))
+        sub = Subsegment.build(@trace, @base_segment_id, remote: remote, name: overwrite_name(name))
 
         begin
           yield sub
@@ -135,22 +135,22 @@ module Aws
       #
       # @param [String] name
       def overwrite(name:)
-        @sub_segment_name = name.to_s
+        @subsegment_name = name.to_s
 
         begin
           yield
         ensure
-          @sub_segment_name = nil
+          @subsegment_name = nil
         end
       end
 
       private
 
       def overwrite_name(name)
-        return name unless @sub_segment_name
+        return name unless @subsegment_name
 
-        name = @sub_segment_name
-        @sub_segment_name = nil
+        name = @subsegment_name
+        @subsegment_name = nil
         name
       end
     end

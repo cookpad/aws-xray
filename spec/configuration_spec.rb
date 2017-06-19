@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Aws::Xray::Configuration do
   describe '#client_options' do
-    before { allow(ENV).to receive(:[]).and_return(location) }
+    before { allow(ENV).to receive(:[]) {|key| location if key == 'AWS_XRAY_LOCATION' } }
 
     context 'when valid hostname and port are given' do
       let(:location) { 'xray:2000' }
@@ -62,7 +62,7 @@ RSpec.describe Aws::Xray::Configuration do
   end
 
   describe '#excluded_paths' do
-    before { allow(ENV).to receive(:[]).and_return(value) }
+    before { allow(ENV).to receive(:[]) {|key| value if key == 'AWS_XRAY_EXCLUDED_PATHS' } }
 
     context 'when valid value is given' do
       let(:value) { 'revision,app/health' }
