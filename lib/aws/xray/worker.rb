@@ -17,7 +17,9 @@ module Aws
         # @param [String] payload to send
         # @param [Aws::Xray::Client] client
         def post(payload, client)
+          Aws::Xray.config.logger.debug("#{Thread.current}: Worker.post received a job")
           @queue.push(Item.new(payload, client.copy))
+          Aws::Xray.config.logger.debug("#{Thread.current}: Worker.post pushed a job")
         rescue ThreadError => e
           raise QueueIsFullError.new(e)
         end
@@ -38,19 +40,20 @@ module Aws
       def run
         th = Thread.new(@queue) do |queue|
           loop do
+            Aws::Xray.config.logger.debug("#{Thread.current}: Worker#run waits a job")
             item = queue.pop
+            Aws::Xray.config.logger.debug("#{Thread.current}: Worker#run received a job")
             if item.is_a?(Item)
               item.client.send_payload(item.payload)
+              Aws::Xray.config.logger.debug("#{Thread.current}: Worker#run sent a payload")
             else
-              # TODO
+              Aws::Xray.config.logger.debug("#{Thread.current}: Worker#run received invalid item, ignored it")
             end
           end
         end
         th.abort_on_exception = true
         th
       end
-
-      reset(Aws::Xray::Worker::Configuration.new)
     end
   end
 end

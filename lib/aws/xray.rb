@@ -1,3 +1,5 @@
+require 'logger'
+
 require 'aws/xray/version'
 require 'aws/xray/errors'
 require 'aws/xray/trace'
@@ -19,6 +21,7 @@ module Aws
     class << self
       attr_reader :config
     end
+    Worker.reset(Worker::Configuration.new)
 
     # @param [String] name a logical name of this tracing context.
     def self.trace(name: nil)
