@@ -13,12 +13,17 @@ module Aws
       class Item < Struct.new(:payload, :client)
       end
 
+      @post_lock = ::Mutex.new
+      @pid = $$
       class << self
         # @param [String] payload to send
         # @param [Aws::Xray::Client] client
         def post(payload, client)
           Aws::Xray.config.logger.debug("#{Thread.current}: Worker.post received a job")
-          @queue.push(Item.new(payload, client.copy))
+          @post_lock.synchronize do
+            refresh_if_forked
+            @queue.push(Item.new(payload, client.copy))
+          end
           Aws::Xray.config.logger.debug("#{Thread.current}: Worker.post pushed a job")
         rescue ThreadError => e
           raise QueueIsFullError.new(e)
@@ -30,7 +35,15 @@ module Aws
           @workers.each(&:kill) if defined?(@workers) && !@workers.empty?
           @workers = Array.new(config.num) { new(@queue).run }
         end
-        # Call `.reset` after class definetion section.
+
+        private
+
+        def refresh_if_forked
+          if @pid != $$
+            reset(Aws::Xray.config.worker)
+            @pid = $$
+          end
+        end
       end
 
       def initialize(queue)

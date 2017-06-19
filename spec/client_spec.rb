@@ -40,6 +40,28 @@ RSpec.describe Aws::Xray::Client do
       end
     end
 
+    # Note that fork(2) is not avaiable on some platforms like Windows and
+    # NetBSD 4.
+    if Process.respond_to?(:fork)
+      context 'when fork(2) was called and executed in the child process' do
+        it 'sends given segment' do
+          s = build_server
+
+          Process.fork do
+            client = described_class.new(host: '127.0.0.1', port: s.addr[1])
+            client.send_segment(segment); sleep 0.01;
+          end
+
+          sent = Timeout.timeout(1) { s.recvfrom(1024)[0] }
+          expect(sent.split("\n").size).to eq(2)
+
+          header, body = sent.split("\n").map {|e| JSON.parse(e) }
+          expect(header).to eq('format' => 'json', 'version' => 1)
+          expect(body).to eq(payload)
+        end
+      end
+    end
+
     context 'when too large payload is about to sent' do
       # Build as much as large payload to occur Errno::EMSGSIZE.
       # This is not platform compatible solution though...
