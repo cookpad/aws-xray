@@ -3,9 +3,9 @@ require 'spec_helper'
 RSpec.describe Aws::Xray::Hooks::NetHttp do
   before do
     Thread.abort_on_exception = true
+    allow(Aws::Xray.config).to receive(:client_options).and_return(sock: io)
   end
 
-  let(:xray_client) { Aws::Xray::Client.new(sock: io) }
   let(:io) { Aws::Xray::TestSocket.new }
   let(:trace) { Aws::Xray::Trace.new(root: '1-67891233-abcdef012345678912345678') }
   let(:host) { '127.0.0.1' }
@@ -25,7 +25,7 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
 
   def build_client_thread(&block)
     Thread.new(block) do
-      Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
+      Aws::Xray::Context.with_new_context('test-app', trace) do
         Aws::Xray::Context.current.base_trace do
           block.call
         end

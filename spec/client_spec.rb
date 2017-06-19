@@ -27,9 +27,9 @@ RSpec.describe Aws::Xray::Client do
     context 'success case' do
       it 'sends given segment' do
         s = build_server
-        client = described_class.new(host: '127.0.0.1', port: s.addr[1])
+        allow(Aws::Xray.config).to receive(:client_options).and_return(host: '127.0.0.1', port: s.addr[1])
 
-        client.send_segment(segment); sleep 0.01;
+        Aws::Xray::Client.send_segment(segment); sleep 0.01;
 
         sent = s.recvfrom(1024)[0]
         expect(sent.split("\n").size).to eq(2)
@@ -48,8 +48,8 @@ RSpec.describe Aws::Xray::Client do
           s = build_server
 
           Process.fork do
-            client = described_class.new(host: '127.0.0.1', port: s.addr[1])
-            client.send_segment(segment); sleep 0.01;
+            allow(Aws::Xray.config).to receive(:client_options).and_return(host: '127.0.0.1', port: s.addr[1])
+            Aws::Xray::Client.send_segment(segment); sleep 0.01;
           end
 
           sent = Timeout.timeout(1) { s.recvfrom(1024)[0] }
@@ -69,38 +69,42 @@ RSpec.describe Aws::Xray::Client do
 
       it 'ignores system call erros' do
         s = build_server
-        client = described_class.new(host: '127.0.0.1', port: s.addr[1])
-
-        client.send_segment(segment); wait;
+        allow(Aws::Xray.config).to receive(:client_options).and_return(host: '127.0.0.1', port: s.addr[1])
+        Aws::Xray::Client.send_segment(segment); wait;
         expect(io.tap(&:rewind).read).to match(/Failed to send a segment/)
       end
     end
 
     context 'when invalid port is specified' do
+      before { allow(Aws::Xray.config).to receive(:client_options).and_return(host: '127.0.0.1', port: 0) }
+
       it 'ignores socket errors' do
-        client = described_class.new(host: '127.0.0.1', port: 0)
-        client.send_segment(segment); wait;
+        Aws::Xray::Client.send_segment(segment); wait;
         expect(io.tap(&:rewind).read).to match(/Failed to send a segment/)
       end
     end
 
     context 'when can not send all bytes' do
       let(:sock) { double('sock', close: nil) }
-      before { allow(sock).to receive(:send).and_return(0) }
+      before do
+        allow(sock).to receive(:send).and_return(0)
+        allow(Aws::Xray.config).to receive(:client_options).and_return(sock: sock)
+      end
 
       it 'raises CanNotSendAllByteError' do
-        client = described_class.new(sock: sock)
-        client.send_segment(segment); wait;
+        Aws::Xray::Client.send_segment(segment); wait;
         expect(io.tap(&:rewind).read).to match(/Can not send all bytes/)
       end
     end
 
     context 'when queue is full' do
-      before { allow(Aws::Xray::Worker::Item).to receive(:new).and_raise(ThreadError) }
+      before do
+        allow(Aws::Xray::Worker.instance_variable_get('@queue')).to receive(:push).and_raise(ThreadError)
+        allow(Aws::Xray.config).to receive(:client_options).and_return(host: '127.0.0.1', port: 0)
+      end
 
       it 'raises QueueIsFullError' do
-        client = described_class.new(host: '127.0.0.1', port: 0)
-        client.send_segment(segment); wait;
+        Aws::Xray::Client.send_segment(segment); wait;
         expect(io.tap(&:rewind).read).to match(/The queue exceeds max size/)
       end
     end
@@ -112,11 +116,11 @@ RSpec.describe Aws::Xray::Client do
         ex.run
         Aws::Xray.config.segment_sending_error_handler = back
       end
+      before { allow(Aws::Xray.config).to receive(:client_options).and_return(host: '127.0.0.1', port: 0) }
 
       it 'rescues the error and log them' do
-        client = described_class.new(host: '127.0.0.1', port: 0)
         expect {
-          client.send_segment(segment); wait;
+          Aws::Xray::Client.send_segment(segment); wait;
         }.to output(/test error/).to_stderr
       end
     end
@@ -128,11 +132,11 @@ RSpec.describe Aws::Xray::Client do
         ex.run
         Aws::Xray.config.segment_sending_error_handler = back
       end
+      before { allow(Aws::Xray.config).to receive(:client_options).and_return(host: '127.0.0.1', port: 0) }
 
       it 'does not do nothing' do
-        client = described_class.new(host: '127.0.0.1', port: 0)
         expect {
-          client.send_segment(segment); wait;
+          Aws::Xray::Client.send_segment(segment); wait;
         }.to output(/ErrorHandlerWithSentry is configured but `Raven` is undefined./).to_stderr
       end
     end

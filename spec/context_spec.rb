@@ -5,15 +5,13 @@ RSpec.describe Aws::Xray::Context do
   let(:trace) { Aws::Xray::Trace.generate }
 
   describe 'sampling' do
-    let(:client) { double('client') }
-
     context 'when not sampled' do
       let(:trace) { Aws::Xray::Trace.new(sampled: false, root: '') }
 
       it 'does not send segments' do
-        expect(client).not_to receive(:send_segment)
+        expect(Aws::Xray::Client).not_to receive(:send_segment)
 
-        Aws::Xray::Context.with_new_context('test-app', client, trace) do
+        Aws::Xray::Context.with_new_context('test-app', trace) do
           Aws::Xray::Context.current.base_trace {}
         end
       end
@@ -23,9 +21,9 @@ RSpec.describe Aws::Xray::Context do
       let(:trace) { Aws::Xray::Trace.new(sampled: true, root: '') }
 
       it 'sends segments' do
-        expect(client).to receive(:send_segment)
+        expect(Aws::Xray::Client).to receive(:send_segment)
 
-        Aws::Xray::Context.with_new_context('test-app', client, trace) do
+        Aws::Xray::Context.with_new_context('test-app', trace) do
           Aws::Xray::Context.current.base_trace {}
         end
       end
@@ -33,11 +31,8 @@ RSpec.describe Aws::Xray::Context do
   end
 
   describe 'thread safety' do
-    let(:client) { double(:client) }
-    before { allow(client).to receive(:copy).and_return(client) }
-
     specify 'a context is not shared between threads' do
-      described_class.with_new_context('test-app', client, trace) do
+      described_class.with_new_context('test-app', trace) do
         expect(Aws::Xray::Context.current).to be_a(Aws::Xray::Context)
         expect {
           Thread.new { Aws::Xray::Context.current }.join
@@ -46,7 +41,7 @@ RSpec.describe Aws::Xray::Context do
     end
 
     specify 'a context can be passed to another thread' do
-      described_class.with_new_context('test-app', client, trace) do
+      described_class.with_new_context('test-app', trace) do
         expect {
           Thread.new(Aws::Xray::Context.current.copy) {|context|
             Aws::Xray::Context.with_given_context(context) do
@@ -60,9 +55,9 @@ RSpec.describe Aws::Xray::Context do
     specify 'subsegments can be sent from multiple threads' do
       server = UDPSocket.new
       server.bind('127.0.0.1', 0)
-      client = Aws::Xray::Client.new(host: server.addr[2], port: server.addr[1])
+      allow(Aws::Xray.config).to receive(:client_options).and_return(host: server.addr[2], port: server.addr[1])
 
-      described_class.with_new_context('test-app', client, trace) do
+      described_class.with_new_context('test-app', trace) do
         Aws::Xray::Context.current.base_trace do
           threads = 100.times.map do |i|
             Thread.new(Aws::Xray::Context.current.copy) {|context|
@@ -93,12 +88,12 @@ RSpec.describe Aws::Xray::Context do
   end
 
   describe '#overwrite' do
-    let(:client) { Aws::Xray::Client.new(sock: io) }
     let(:io) { Aws::Xray::TestSocket.new }
+    before { allow(Aws::Xray.config).to receive(:client_options).and_return(sock: io) }
 
     context 'when not set' do
       it 'does not overwrite' do
-        Aws::Xray::Context.with_new_context('test-app', client, trace) do
+        Aws::Xray::Context.with_new_context('test-app', trace) do
           Aws::Xray::Context.current.base_trace do
             Aws::Xray::Context.current.child_trace(name: 'name1', remote: false) do
               Aws::Xray::Context.current.child_trace(name: 'name2', remote: false) {}
@@ -119,7 +114,7 @@ RSpec.describe Aws::Xray::Context do
 
     context 'when set' do
       it 'overwrites sub segment at once' do
-        Aws::Xray::Context.with_new_context('test-app', client, trace) do
+        Aws::Xray::Context.with_new_context('test-app', trace) do
           Aws::Xray::Context.current.base_trace do
             Aws::Xray::Context.current.overwrite(name: 'overwrite') do
               Aws::Xray::Context.current.child_trace(name: 'name1', remote: false) do

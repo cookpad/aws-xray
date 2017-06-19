@@ -26,12 +26,11 @@ module Aws
         end
 
         # @param [String] name logical name of this tracing context.
-        # @param [Aws::Xray::Client] client
         # @param [Aws::Xray::Trace] trace newly generated trace or created with
         #   HTTP request header.
         # @yield [Aws::Xray::Context] newly created context.
-        def with_new_context(name, client, trace)
-          build_current(name, client, trace)
+        def with_new_context(name, trace)
+          build_current(name, trace)
           yield
         ensure
           remove_current
@@ -39,8 +38,8 @@ module Aws
 
         private
 
-        def build_current(name, client, trace)
-          Thread.current.thread_variable_set(VAR_NAME, Context.new(name, client, trace))
+        def build_current(name, trace)
+          Thread.current.thread_variable_set(VAR_NAME, Context.new(name, trace))
         end
 
         def remove_current
@@ -50,11 +49,9 @@ module Aws
 
       attr_reader :name
 
-      # client and trace are frozen by default.
-      def initialize(name, client, trace, base_segment_id = nil)
+      def initialize(name, trace, base_segment_id = nil)
         raise 'name is required' unless name
         @name = name
-        @client = client
         @trace = trace
         @base_segment_id = base_segment_id
         @disabled_ids = []
@@ -65,11 +62,11 @@ module Aws
       # but in case we need this, offer copy interface for multi threaded
       # environment.
       #
-      # client and trace should be imutable and thread-safe.
+      # Trace should be imutable and thread-safe.
       #
       # See README for example.
       def copy
-        self.class.new(@name.dup, @client.copy, @trace.copy, @base_segment_id ? @base_segment_id.dup : nil)
+        self.class.new(@name.dup, @trace.copy, @base_segment_id ? @base_segment_id.dup : nil)
       end
 
       # Rescue all exceptions and record the exception to the segment.
@@ -88,7 +85,7 @@ module Aws
           raise e
         ensure
           base_segment.finish
-          @client.send_segment(base_segment) if @trace.sampled?
+          Client.send_segment(base_segment) if @trace.sampled?
         end
       end
 
@@ -107,7 +104,7 @@ module Aws
           raise e
         ensure
           sub.finish
-          @client.send_segment(sub) if @trace.sampled?
+          Client.send_segment(sub) if @trace.sampled?
         end
       end
 
