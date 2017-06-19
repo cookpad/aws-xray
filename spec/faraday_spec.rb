@@ -13,13 +13,13 @@ RSpec.describe Aws::Xray::Faraday do
     end
   end
   let(:headers) { { 'Host' => 'target-app' } }
-  let(:xray_client) { Aws::Xray::Client.new(sock: io) }
-  let(:io) { Aws::Xray::TestSocket.new }
   let(:trace) { Aws::Xray::Trace.new(root: '1-67891233-abcdef012345678912345678') }
+  let(:io) { Aws::Xray::TestSocket.new }
+  before { allow(Aws::Xray.config).to receive(:client_options).and_return(sock: io) }
 
   context 'without name option' do
     it 'uses host header value' do
-      res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
+      res = Aws::Xray::Context.with_new_context('test-app', trace) do
         Aws::Xray::Context.current.base_trace do
           client.get('/foo')
         end
@@ -67,7 +67,7 @@ RSpec.describe Aws::Xray::Faraday do
         builder.adapter :test, stubs
       end
 
-      res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
+      res = Aws::Xray::Context.with_new_context('test-app', trace) do
         Aws::Xray::Context.current.base_trace do
           client.get('/foo')
         end
@@ -94,7 +94,7 @@ RSpec.describe Aws::Xray::Faraday do
       end
 
       it 'traces remote fault' do
-        res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
+        res = Aws::Xray::Context.with_new_context('test-app', trace) do
           Aws::Xray::Context.current.base_trace do
             client.get('/foo')
           end
@@ -132,7 +132,7 @@ RSpec.describe Aws::Xray::Faraday do
       end
 
       it 'traces remote fault' do
-        res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
+        res = Aws::Xray::Context.with_new_context('test-app', trace) do
           Aws::Xray::Context.current.base_trace do
             client.get('/foo')
           end
@@ -160,7 +160,7 @@ RSpec.describe Aws::Xray::Faraday do
       end
 
       it 'traces remote fault' do
-        res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
+        res = Aws::Xray::Context.with_new_context('test-app', trace) do
           Aws::Xray::Context.current.base_trace do
             client.get('/foo')
           end
@@ -190,7 +190,7 @@ RSpec.describe Aws::Xray::Faraday do
 
     it 'traces remote fault' do
       expect {
-        Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
+        Aws::Xray::Context.with_new_context('test-app', trace) do
           Aws::Xray::Context.current.base_trace do
             client.get('/foo')
           end
@@ -249,7 +249,7 @@ RSpec.describe Aws::Xray::Faraday do
     end
 
     it 'accepts name parameter' do
-      res = Aws::Xray::Context.with_new_context('test-app', xray_client, trace) do
+      res = Aws::Xray::Context.with_new_context('test-app', trace) do
         Aws::Xray::Context.current.base_trace do
           client.get('/foo')
         end

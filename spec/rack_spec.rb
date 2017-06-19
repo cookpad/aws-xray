@@ -6,11 +6,12 @@ RSpec.describe Aws::Xray::Rack do
 
   let(:env) { { 'HTTP_X_AMZN_TRACE_ID' => 'Root=1-67891233-abcdef012345678912345678;Parent=53995c3f42cd8ad8' } }
   let(:io) { Aws::Xray::TestSocket.new }
+  before { allow(Aws::Xray.config).to receive(:client_options).and_return(sock: io) }
 
   describe 'base tracing' do
     let(:app) do
       builder = Rack::Builder.new
-      builder.use described_class, client_options: { sock: io }
+      builder.use described_class
       builder.run ->(_) { [200, {}, ['hello']] }
       builder
     end
@@ -53,7 +54,7 @@ RSpec.describe Aws::Xray::Rack do
   describe 'sub segment tracing' do
     let(:app) do
       builder = Rack::Builder.new
-      builder.use described_class, client_options: { sock: io }
+      builder.use described_class
       builder.run -> (_) {
         Aws::Xray::Context.current.child_trace(remote: false, name: 'funccall_f') {}
         [200, {}, ['hello']]
@@ -94,7 +95,7 @@ RSpec.describe Aws::Xray::Rack do
       let(:app) { ->(_) { raise test_error } }
 
       it 'calls original app and adds formated trace header value and sends base segment' do
-        stack = described_class.new(app, client_options: { sock: io })
+        stack = described_class.new(app)
         expect { stack.call(env) }.to raise_error(test_error)
 
         io.rewind
@@ -120,7 +121,7 @@ RSpec.describe Aws::Xray::Rack do
       let(:test_error) { Class.new(StandardError) }
       let(:app) do
         builder = Rack::Builder.new
-        builder.use described_class, client_options: { sock: io }
+        builder.use described_class
         builder.use Class.new {
           def initialize(app); @app = app; end
           def call(env)
@@ -168,7 +169,7 @@ RSpec.describe Aws::Xray::Rack do
       let(:app) do
         builder = Rack::Builder.new
         builder.use Rack::Timeout, service_timeout: 0.01
-        builder.use described_class, client_options: { sock: io }
+        builder.use described_class
         builder.run ->(_) { sleep 0.03 }
         builder
       end
@@ -200,7 +201,7 @@ RSpec.describe Aws::Xray::Rack do
   describe 'path excluding' do
     let(:app) do
       builder = Rack::Builder.new
-      builder.use described_class, excluded_paths: excluded_paths, client_options: { sock: io }
+      builder.use described_class, excluded_paths: excluded_paths
       builder.run ->(_) { [200, {}, ['hello']] }
       builder
     end
