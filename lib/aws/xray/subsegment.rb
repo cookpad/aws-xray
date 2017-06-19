@@ -3,7 +3,7 @@ require 'aws/xray/segment'
 module Aws
   module Xray
     # http://docs.aws.amazon.com/xray/latest/devguide/xray-api-segmentdocuments.html
-    class SubSegment < Segment
+    class Subsegment < Segment
       # @param [Boolean] remote
       def self.build(trace, parent_id, remote:, name:)
         new(name: name, trace: trace, parent_id: parent_id, remote: remote)
