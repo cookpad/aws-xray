@@ -7,21 +7,22 @@ module Aws
   module Xray
     # thread-unsafe, suppose to be used only in initialization phase.
     class Configuration
+      # Freeze to force users to set default annotation with writer method.
+      DEFAULT_ANNOTATION = {
+        hostname: Socket.gethostname,
+      }.freeze
+
+      DEFAULT_METADATA = {
+        tracing_sdk: {
+          name: 'aws-xray',
+          version: Aws::Xray::VERSION,
+        }
+      }.freeze
+
       def initialize
         @logger = ::Logger.new($stdout).tap {|l| l.level = Logger::INFO }
-      end
-
-      # @return [String] name Logical service name for this application.
-      def name
-        @name ||= ENV['AWS_XRAY_NAME']
-      end
-      attr_writer :name
-
-      # @return [Hash] client_options For xray-agent client.
-      #   - host: e.g. '127.0.0.1'
-      #   - port: e.g. 2000
-      def client_options
-        @client_options ||=
+        @name = ENV['AWS_XRAY_NAME']
+        @client_options =
           begin
             option = (ENV['AWS_XRAY_LOCATION'] || '').split(':')
             host = option[0]
@@ -32,60 +33,54 @@ module Aws
               { sock: NullSocket.new }
             end
           end
+        @excluded_paths = (ENV['AWS_XRAY_EXCLUDED_PATHS'] || '').split(',')
+        @version = VersionDetector.new.call
+        @default_annotation = DEFAULT_ANNOTATION
+        @default_metadata = DEFAULT_METADATA
+        @segment_sending_error_handler = DefaultErrorHandler.new($stderr)
+        @worker = Aws::Xray::Worker::Configuration.new
+        @sampling_rate = Float(ENV['AWS_XRAY_SAMPLING_RATE'] || 0.001)
       end
-      attr_writer :client_options
 
+      # @param [String] name Logical service name for this application.
+      # @return [String]
+      attr_accessor :name
+
+      # @param [Hash] client_options For xray-agent client.
+      #   - host: e.g. '127.0.0.1'
+      #   - port: e.g. 2000
+      # @return [Hash]
+      attr_accessor :client_options
+
+      # @param [Array<String>] excluded_paths
       # @return [Array<String>]
-      def excluded_paths
-        @excluded_paths ||= (ENV['AWS_XRAY_EXCLUDED_PATHS'] || '').split(',')
-      end
-      attr_writer :excluded_paths
+      attr_accessor :excluded_paths
 
       # @return [String]
-      def version
-        @version ||= VersionDetector.new.call
-      end
+      attr_reader :version
       # @param [String,Proc] version A String or callable object which returns application version.
       #   Default version detection tries to solve with `app_root/REVISION` file.
       def version=(v)
         @version = v.respond_to?(:call) ? v.call : v
       end
 
-      DEFAULT_ANNOTATION = {
-        hostname: Socket.gethostname,
-      }.freeze
-      # @return [Hash] default annotation with key-value format.
-      def default_annotation
-        @default_annotation ||= DEFAULT_ANNOTATION
-      end
-      # @param [Hash] h default annotation Hash.
+      # @return [Hash]
+      attr_reader :default_annotation
+      # @param [Hash] annotation annotation with key-value format. keys and
+      #   values are automatically normalized according to X-Ray's format spec.
       def default_annotation=(annotation)
         @default_annotation = AnnotationNormalizer.call(annotation)
       end
 
-      DEFAULT_METADATA = {
-        tracing_sdk: {
-          name: 'aws-xray',
-          version: Aws::Xray::VERSION,
-        }
-      }.freeze
-      # @return [Hash] Default metadata.
-      def default_metadata
-        @default_metadata ||= DEFAULT_METADATA
-      end
-      # @param [Hash] metadata Default metadata.
-      attr_writer :default_metadata
+      # @param [Hash] default_metadatametadata Default metadata.
+      # @return [Hash]
+      attr_accessor :default_metadata
 
-      def segment_sending_error_handler
-        @segment_sending_error_handler ||= DefaultErrorHandler.new($stderr)
-      end
       # @param [Proc] segment_sending_error_handler Callable object
-      attr_writer :segment_sending_error_handler
+      attr_accessor :segment_sending_error_handler
 
       # @return [Aws::Xray::Worker::Configuration]
-      def worker
-        @worker ||= Aws::Xray::Worker::Configuration.new
-      end
+      attr_reader :worker
       # Set given configuration and reset workers according to the given
       # configuration.
       # @param [Aws::Xray::Worker::Configuration] conf
@@ -96,12 +91,9 @@ module Aws
       end
 
       # Default is 0.1%.
-      # @return [Float]
-      def sampling_rate
-        @sampling_rate ||= Float(ENV['AWS_XRAY_SAMPLING_RATE'] || 0.001)
-      end
       # @param [Float] sampling_rate
-      attr_writer :sampling_rate
+      # @return [Float]
+      attr_accessor :sampling_rate
 
       # @param [Logger] logger
       # @return [Logger]
