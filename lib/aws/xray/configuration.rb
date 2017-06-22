@@ -40,6 +40,7 @@ module Aws
         @segment_sending_error_handler = DefaultErrorHandler.new($stderr)
         @worker = Aws::Xray::Worker::Configuration.new
         @sampling_rate = Float(ENV['AWS_XRAY_SAMPLING_RATE'] || 0.001)
+        @solr_hook_name = 'solr'
       end
 
       # @param [String] name Logical service name for this application.
@@ -98,6 +99,10 @@ module Aws
       # @param [Logger] logger
       # @return [Logger]
       attr_accessor :logger
+
+      # @param [String] solr_hook_name
+      # @return [String]
+      attr_accessor :solr_hook_name
     end
   end
 end

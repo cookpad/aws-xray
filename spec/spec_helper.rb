@@ -9,11 +9,13 @@ require 'aws/xray/hooks/all'
 
 require 'fileutils'
 require 'rack/test'
+require 'webmock'
 
 Aws::Xray.config.name = 'test-app'
 Aws::Xray.config.version = -> { 'deadbeef' }
 Aws::Xray.config.worker = Aws::Xray::Worker::Configuration.new(num: 1)
 Aws::Xray.config.sampling_rate = 1
+Aws::Xray.config.solr_hook_name = 'solr-test'
 
 require 'json-schema'
 # Json schema for `cause` object is invalid now.

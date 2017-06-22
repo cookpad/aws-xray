@@ -30,5 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rack-test'
   spec.add_development_dependency 'rack-timeout'
   spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'rsolr'
   spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'webmock'
 end
