@@ -120,6 +120,15 @@ response = Aws::Xray.overwrite(name: 'sns') do
 end
 ```
 
+#### rsolr hook
+When you want to name solr requests, use this hook by require `aws/xray/hooks/rsolr`. The typical usecase is you use local haproxy to proxy to solr instances and you want to distinguish these requests from other reqeusts using local haproxy.
+
+If you want to give a specific name, configure it:
+
+```ruby
+Aws::Xray.config.solr_hook_name = 'solr-development'
+```
+
 ### Multi threaded environment
 Tracing context is thread local. To pass current tracing context, copy current tracing context:
 
