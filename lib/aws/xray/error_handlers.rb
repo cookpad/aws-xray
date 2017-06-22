@@ -27,7 +27,7 @@ Error: #{error}
 
       def call(error, payload, host:, port:)
         if defined?(Raven)
-          ::Raven.capture_exception(error, level: ERROR_LEVEL)
+          ::Raven.capture_exception(error, level: ERROR_LEVEL, extra: { 'payload' => payload })
         else
           $stderr.puts('ErrorHandlerWithSentry is configured but `Raven` is undefined.')
         end
