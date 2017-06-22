@@ -23,9 +23,11 @@ Error: #{error}
 
     # Must be configured sentry-raven gem.
     class ErrorHandlerWithSentry
+      ERROR_LEVEL = 'warning'.freeze
+
       def call(error, payload, host:, port:)
         if defined?(Raven)
-          ::Raven.capture_exception(error)
+          ::Raven.capture_exception(error, level: ERROR_LEVEL)
         else
           $stderr.puts('ErrorHandlerWithSentry is configured but `Raven` is undefined.')
         end
