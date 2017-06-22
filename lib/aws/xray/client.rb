@@ -38,7 +38,7 @@ module Aws
 
           begin
             len = sock.send(payload, Socket::MSG_DONTWAIT, host, port)
-            raise CanNotSendAllByteError.new(payload.size, len) if payload.size != len
+            raise CanNotSendAllByteError.new(payload.bytesize, len) if payload.bytesize != len
             Aws::Xray.config.logger.debug("#{Thread.current}: Client#send_payload successfully sent payload, len=#{len}")
             len
           rescue SystemCallError, SocketError, CanNotSendAllByteError => e
