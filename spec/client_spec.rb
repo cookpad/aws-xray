@@ -62,7 +62,19 @@ RSpec.describe Aws::Xray::Client do
       end
     end
 
-    context 'when too large payload is about to sent' do
+    context 'when sending segments including non-ASCII chars' do
+      let(:payload) { { 'id' => "\u3042\u3044" } }
+
+      it 'correctly count bytesize' do
+        s = build_server
+        allow(Aws::Xray.config).to receive(:client_options).and_return(host: '127.0.0.1', port: s.addr[1])
+
+        Aws::Xray::Client.send_segment(segment); wait;
+        expect(io.tap(&:rewind).read).not_to match(/Can not send all bytes/)
+      end
+    end
+
+    context 'when too large payload is sent' do
       # Build as much as large payload to occur Errno::EMSGSIZE.
       # This is not platform compatible solution though...
       let(:payload) { { 'data' => 'abc' * 100000 } }
