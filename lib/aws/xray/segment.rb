@@ -51,10 +51,10 @@ module Aws
         set_http_response(status, length)
         type = remote ? 'http_request_error' : 'http_response_error'
         case status.to_i
-        when 499
-          cause = Cause.new(stack: caller, message: 'Got 499', type: type)
+        when 429
+          cause = Cause.new(stack: caller, message: 'Got 429', type: type)
           set_error(error: true, remote: remote, throttle: true, cause: cause)
-        when 400..498
+        when 400..499
           cause = Cause.new(stack: caller, message: 'Got 4xx', type: type)
           set_error(error: true, remote: remote, cause: cause)
         when 500..599

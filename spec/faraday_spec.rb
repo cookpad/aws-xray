@@ -124,10 +124,10 @@ RSpec.describe Aws::Xray::Faraday do
       end
     end
 
-    context '499' do
+    context '429' do
       let(:stubs) do
         Faraday::Adapter::Test::Stubs.new do |stub|
-          stub.get('/foo') { |env| [499, {}, 'fault'] }
+          stub.get('/foo') { |env| [429, {}, 'fault'] }
         end
       end
 
@@ -137,7 +137,7 @@ RSpec.describe Aws::Xray::Faraday do
             client.get('/foo')
           end
         end
-        expect(res.status).to eq(499)
+        expect(res.status).to eq(429)
 
         sent_jsons = io.tap(&:rewind).read.split("\n")
         body = JSON.parse(sent_jsons[1])
@@ -147,7 +147,7 @@ RSpec.describe Aws::Xray::Faraday do
         expect(body['fault']).to eq(false)
 
         e = body['cause']['exceptions'].first
-        expect(e['message']).to eq('Got 499')
+        expect(e['message']).to eq('Got 429')
         expect(e['remote']).to eq(true)
       end
     end
