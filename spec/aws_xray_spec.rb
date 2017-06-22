@@ -2,13 +2,13 @@ require 'spec_helper'
 require 'timeout'
 
 RSpec.describe Aws::Xray do
-  describe '.trace' do
-    before do
-      allow(Aws::Xray.config).to receive(:client_options).and_return(client_options)
-    end
-    let(:client_options) { { sock: io } }
-    let(:io) { Aws::Xray::TestSocket.new }
+  before do
+    allow(Aws::Xray.config).to receive(:client_options).and_return(client_options)
+  end
+  let(:client_options) { { sock: io } }
+  let(:io) { Aws::Xray::TestSocket.new }
 
+  describe '.trace' do
     context 'when succeed' do
       it 'starts tracing' do
         Aws::Xray.trace(name: 'test') {}
@@ -42,6 +42,33 @@ RSpec.describe Aws::Xray do
 
         body = JSON.parse(sent_jsons[1])
         expect(body['fault']).to eq(true)
+      end
+    end
+  end
+
+  describe '.overwrite' do
+    context 'when the context is not set' do
+      it 'does nothing' do
+        expect { Aws::Xray.overwrite(name: 'overwrite') { } }.not_to raise_error
+
+        sent_jsons = io.tap(&:rewind).read.split("\n")
+        expect(sent_jsons.size).to eq(0)
+      end
+    end
+
+    context 'when the context is set' do
+      it 'overwrites name' do
+        Aws::Xray.trace(name: 'test') do
+          Aws::Xray.overwrite(name: 'overwrite') do
+            Aws::Xray::Context.current.child_trace(name: 'name1', remote: false) {}
+          end
+        end
+
+        sent_jsons = io.tap(&:rewind).read.split("\n")
+        expect(sent_jsons.size).to eq(4)
+        overwrote_one = JSON.parse(sent_jsons[1])
+
+        expect(overwrote_one['name']).to eq('overwrite')
       end
     end
   end
