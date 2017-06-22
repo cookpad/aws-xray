@@ -115,7 +115,7 @@ If you can't access headers, e.g. external client library like aws-sdk or dogapi
 
 ```ruby
 client = Aws::Sns::Client.new
-response = Aws::Xray::Context.current.overwrite(name: 'sns') do
+response = Aws::Xray.overwrite(name: 'sns') do
   client.create_topic(...)
 end
 ```
