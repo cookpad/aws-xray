@@ -32,5 +32,16 @@ module Aws
         end
       end
     end
+
+    # Overwrite under lying tracing name at once. If current context does not
+    # set to current thread, do nothing.
+    # @param [String] name
+    def self.overwrite(name:, &block)
+      if Context.started?
+        Context.current.overwrite(name: name, &block)
+      else
+        block.call
+      end
+    end
   end
 end

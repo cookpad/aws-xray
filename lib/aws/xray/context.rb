@@ -126,12 +126,15 @@ module Aws
         @disabled_ids.include?(id)
       end
 
-      # Temporary overwrite sub segment with given data in given block.
-      # The overwriting will be occured only one time.
       # CAUTION: the injection will NOT be propagated between threads!!
+      #
+      # Temporary overwrite subsegment with the name in the block. The
+      # overwriting will be occured only one time.
       #
       # @param [String] name
       def overwrite(name:)
+        return yield if @subsegment_name
+
         @subsegment_name = name.to_s
 
         begin

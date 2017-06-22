@@ -117,8 +117,10 @@ RSpec.describe Aws::Xray::Context do
         Aws::Xray::Context.with_new_context('test-app', trace) do
           Aws::Xray::Context.current.base_trace do
             Aws::Xray::Context.current.overwrite(name: 'overwrite') do
-              Aws::Xray::Context.current.child_trace(name: 'name1', remote: false) do
-                Aws::Xray::Context.current.child_trace(name: 'name2', remote: false) {}
+              Aws::Xray::Context.current.overwrite(name: 'overwrite2') do
+                Aws::Xray::Context.current.child_trace(name: 'name1', remote: false) do
+                  Aws::Xray::Context.current.child_trace(name: 'name2', remote: false) {}
+                end
               end
             end
           end
