@@ -7,7 +7,7 @@ module Aws
     class Trace
       class << self
         def generate(now = Time.now)
-          new(root: generate_root(now))
+          new(root: generate_root(now), sampled: decide_sampling(nil))
         end
 
         def build_from_header_value(header_value, now = Time.now)
@@ -41,7 +41,7 @@ module Aws
 
       attr_reader :root, :parent
 
-      def initialize(root:, sampled: true, parent: nil)
+      def initialize(root:, sampled:, parent: nil)
         @root = root
         @sampled = sampled
         @parent = parent

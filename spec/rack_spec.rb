@@ -198,6 +198,33 @@ RSpec.describe Aws::Xray::Rack do
     end
   end
 
+  describe 'sampling' do
+    let(:app) do
+      builder = Rack::Builder.new
+      builder.use described_class
+      builder.run ->(_) { [200, {}, ['hello']] }
+      builder
+    end
+
+    before { allow(Aws::Xray.config).to receive(:sampling_rate).and_return(0) }
+    let(:env) { {} }
+
+    context 'when Sampled=0' do
+      it 'does not trace the request' do
+        get '/', {}, env
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to eq('hello')
+        expect(last_response.headers['X-Amzn-Trace-Id']).to match(/Sampled=0/)
+
+        io.rewind
+        # Expected format is 2 lines of json string: http://docs.aws.amazon.com/xray/latest/devguide/xray-api.html
+        sent_jsons = io.read.split("\n")
+        expect(sent_jsons.size).to eq(0)
+      end
+    end
+  end
+
   describe 'path excluding' do
     let(:app) do
       builder = Rack::Builder.new
