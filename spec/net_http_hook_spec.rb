@@ -7,7 +7,7 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
   end
 
   let(:io) { Aws::Xray::TestSocket.new }
-  let(:trace) { Aws::Xray::Trace.new(root: '1-67891233-abcdef012345678912345678') }
+  let(:trace) { Aws::Xray::Trace.new(root: '1-67891233-abcdef012345678912345678', sampled: true) }
   let(:host) { '127.0.0.1' }
   let(:server) { TCPServer.new(0) }
   let(:port) { server.addr[1] }

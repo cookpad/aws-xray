@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Aws::Xray::Subsegment do
-  let(:trace) { Aws::Xray::Trace.new(root: '1-67891233-abcdef012345678912345678', parent: 'd5058bbe22392c37') }
+  let(:trace) { Aws::Xray::Trace.new(root: '1-67891233-abcdef012345678912345678', parent: 'd5058bbe22392c37', sampled: true) }
   let(:segment) { Aws::Xray::Segment.build('test-app', trace) }
 
   describe 'serialization' do

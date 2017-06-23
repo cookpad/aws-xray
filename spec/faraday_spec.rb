@@ -13,7 +13,7 @@ RSpec.describe Aws::Xray::Faraday do
     end
   end
   let(:headers) { { 'Host' => 'target-app' } }
-  let(:trace) { Aws::Xray::Trace.new(root: '1-67891233-abcdef012345678912345678') }
+  let(:trace) { Aws::Xray::Trace.new(root: '1-67891233-abcdef012345678912345678', sampled: true) }
   let(:io) { Aws::Xray::TestSocket.new }
   before { allow(Aws::Xray.config).to receive(:client_options).and_return(sock: io) }
 
