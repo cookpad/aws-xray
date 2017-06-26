@@ -1,6 +1,7 @@
 require 'pry'
 require 'faraday'
 require 'aws-xray'
+require 'aws/xray/faraday'
 
 recipe_app = ENV.fetch('RECIPE_APP') # host:port
 

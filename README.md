@@ -55,6 +55,7 @@ This allow your app to trace in-coming HTTP requests.
 To trace out-going HTTP requests, use Faraday middleware.
 
 ```ruby
+require 'aws/xray/faraday'
 Faraday.new('...', headers: { 'Host' => 'down-stream-app-id' } ) do |builder|
   builder.use Aws::Xray::Faraday
   # ...
@@ -64,6 +65,7 @@ end
 If you don't use any Service Discovery tools, pass the down stream app name to the Faraday middleware:
 
 ```ruby
+require 'aws/xray/faraday'
 Faraday.new('...') do |builder|
   builder.use Aws::Xray::Faraday, 'down-stream-app-id'
   # ...
