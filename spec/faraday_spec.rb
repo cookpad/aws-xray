@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'aws/xray/faraday'
 
 RSpec.describe Aws::Xray::Faraday do
   let(:stubs) do

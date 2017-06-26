@@ -1,4 +1,5 @@
 require 'faraday'
+require 'aws/xray'
 
 module Aws
   module Xray

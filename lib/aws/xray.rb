@@ -11,7 +11,6 @@ require 'aws/xray/configuration'
 require 'aws/xray/sockets'
 
 require 'aws/xray/rack'
-require 'aws/xray/faraday'
 
 module Aws
   module Xray
