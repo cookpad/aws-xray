@@ -19,6 +19,15 @@ RSpec.describe Aws::Xray::HeaderParser do
     end
   end
 
+  context 'with custom values' do
+    let(:v) { 'Root=1-5759e988-bd862e3fe1be46a994272793;Parent=53995c3f42cd8ad8;MyField=abc' }
+
+    it 'parses' do
+      r = described_class.parse(v)
+      expect(r).to eq('Root' => '1-5759e988-bd862e3fe1be46a994272793', 'Parent' => '53995c3f42cd8ad8', 'MyField' => 'abc')
+    end
+  end
+
   context 'with extra delimiter' do
     let(:v) { 'Root=1-5759e988-bd862e3fe1be46a994272793;Sampled=1;' }
 
