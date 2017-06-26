@@ -13,7 +13,8 @@ module Aws
         def build_from_header_value(header_value, now = Time.now)
           h = HeaderParser.parse(header_value)
           root = h['Root'] || generate_root(now)
-          new(root: root, sampled: decide_sampling(h['Sampled']), parent: h['Parent'])
+          rest = h.dup.tap {|e| %w[Root Sampled Parent].each {|k| e.delete(k) } }
+          new(root: root, sampled: decide_sampling(h['Sampled']), parent: h['Parent'], rest: rest)
         end
 
         private
@@ -41,17 +42,15 @@ module Aws
 
       attr_reader :root, :parent
 
-      def initialize(root:, sampled:, parent: nil)
+      def initialize(root:, sampled:, parent: nil, rest: {})
         @root = root
         @sampled = sampled
         @parent = parent
+        @rest = rest
       end
 
       def to_header_value
-        v = "Root=#{@root};"
-        sampled? ? v << 'Sampled=1' : v << 'Sampled=0'
-        v << ";Parent=#{@parent}" if has_parent?
-        v
+        to_header_hash.map {|k, v| "#{k}=#{v}" }.join(';')
       end
 
       def sampled?
@@ -64,6 +63,15 @@ module Aws
 
       def copy(parent: @parent)
         self.class.new(root: @root.dup, sampled: @sampled, parent: parent ? parent.dup : nil)
+      end
+
+      private
+
+      def to_header_hash
+        h = {'Root' => @root, 'Sampled' => sampled? ? '1' : '0' }
+        h['Parent'] = @parent if has_parent?
+        h.merge!(@rest)
+        h
       end
     end
   end
