@@ -4,6 +4,7 @@ require 'net/http'
 
 require 'faraday'
 require 'aws-xray'
+require 'aws/xray/faraday'
 require 'aws/xray/hooks/net_http'
 
 user_app = ENV.fetch('USER_APP') # host:port
