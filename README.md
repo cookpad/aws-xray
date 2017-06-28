@@ -87,7 +87,7 @@ end
 Aws::Xray.trace(name: 'my-app-batch') do |seg|
   client.get('/foo')
 
-  Aws::Xray::Context.current.child_trace(name: 'fetch-user', remote: true) do |sub|
+  Aws::Xray::Context.current.start_subsegment(name: 'fetch-user', remote: true) do |sub|
     # DB access or something to trace.
   end
 end

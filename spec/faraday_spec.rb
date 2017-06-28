@@ -21,7 +21,7 @@ RSpec.describe Aws::Xray::Faraday do
   context 'without name option' do
     it 'uses host header value' do
       res = Aws::Xray::Context.with_new_context('test-app', trace) do
-        Aws::Xray::Context.current.base_trace do
+        Aws::Xray::Context.current.start_segment do
           client.get('/foo')
         end
       end
@@ -69,7 +69,7 @@ RSpec.describe Aws::Xray::Faraday do
       end
 
       res = Aws::Xray::Context.with_new_context('test-app', trace) do
-        Aws::Xray::Context.current.base_trace do
+        Aws::Xray::Context.current.start_segment do
           client.get('/foo')
         end
       end
@@ -96,7 +96,7 @@ RSpec.describe Aws::Xray::Faraday do
 
       it 'traces remote fault' do
         res = Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.base_trace do
+          Aws::Xray::Context.current.start_segment do
             client.get('/foo')
           end
         end
@@ -134,7 +134,7 @@ RSpec.describe Aws::Xray::Faraday do
 
       it 'traces remote fault' do
         res = Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.base_trace do
+          Aws::Xray::Context.current.start_segment do
             client.get('/foo')
           end
         end
@@ -162,7 +162,7 @@ RSpec.describe Aws::Xray::Faraday do
 
       it 'traces remote fault' do
         res = Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.base_trace do
+          Aws::Xray::Context.current.start_segment do
             client.get('/foo')
           end
         end
@@ -192,7 +192,7 @@ RSpec.describe Aws::Xray::Faraday do
     it 'traces remote fault' do
       expect {
         Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.base_trace do
+          Aws::Xray::Context.current.start_segment do
             client.get('/foo')
           end
         end
@@ -251,7 +251,7 @@ RSpec.describe Aws::Xray::Faraday do
 
     it 'accepts name parameter' do
       res = Aws::Xray::Context.with_new_context('test-app', trace) do
-        Aws::Xray::Context.current.base_trace do
+        Aws::Xray::Context.current.start_segment do
           client.get('/foo')
         end
       end

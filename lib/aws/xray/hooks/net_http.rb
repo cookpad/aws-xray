@@ -22,7 +22,7 @@ module Aws
             user_agent: req['User-Agent'],
           )
           name = req[NAME_HEADER] || req['Host'] || address
-          Context.current.child_trace(remote: true, name: name) do |sub|
+          Context.current.start_subsegment(remote: true, name: name) do |sub|
             propagate_trace = sub.generate_trace
             req[TRACE_HEADER] = propagate_trace.to_header_value
             sub.set_http_request(request_record)

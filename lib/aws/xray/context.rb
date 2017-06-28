@@ -74,7 +74,7 @@ module Aws
       #
       # @yield [Aws::Xray::Segment]
       # @return [Object] A value which given block returns.
-      def base_trace
+      def start_segment
         base_segment = Segment.build(@name, @trace)
         @base_segment_id = base_segment.id
 
@@ -88,12 +88,13 @@ module Aws
           Client.send_segment(base_segment) if @trace.sampled?
         end
       end
+      alias_method :base_trace, :start_segment
 
       # @param [Boolean] remote
       # @param [String] name Arbitrary name of the sub segment. e.g. "funccall_f".
       # @yield [Aws::Xray::Subsegment]
       # @return [Object] A value which given block returns.
-      def child_trace(remote:, name:)
+      def start_subsegment(remote:, name:)
         raise SegmentDidNotStartError unless @base_segment_id
         sub = Subsegment.build(@trace, @base_segment_id, remote: remote, name: overwrite_name(name))
 
@@ -107,6 +108,7 @@ module Aws
           Client.send_segment(sub) if @trace.sampled?
         end
       end
+      alias_method :child_trace, :start_subsegment
 
       # Temporary disabling tracing for given id in given block.
       # CAUTION: the disabling will NOT be propagated between threads!!
