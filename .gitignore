@@ -8,3 +8,4 @@
 /spec/reports/
 /tmp/
 example/Gemfile.lock
+/db/

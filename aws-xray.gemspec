@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'rack'
+  spec.add_development_dependency 'activerecord'
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'coveralls'
   spec.add_development_dependency 'faraday'
@@ -33,5 +34,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rsolr'
   spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'simplecov'
+  spec.add_development_dependency 'sqlite3'
   spec.add_development_dependency 'webmock'
 end

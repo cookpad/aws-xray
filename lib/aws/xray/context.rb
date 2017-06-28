@@ -84,7 +84,7 @@ module Aws
           base_segment.set_error(fault: true, e: e)
           raise e
         ensure
-          base_segment.finish
+          base_segment.finish unless base_segment.finished?
           Client.send_segment(base_segment) if @trace.sampled?
         end
       end
@@ -104,7 +104,7 @@ module Aws
           sub.set_error(fault: true, e: e)
           raise e
         ensure
-          sub.finish
+          sub.finish unless sub.finished?
           Client.send_segment(sub) if @trace.sampled?
         end
       end
