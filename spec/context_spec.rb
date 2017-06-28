@@ -12,7 +12,7 @@ RSpec.describe Aws::Xray::Context do
         expect(Aws::Xray::Client).not_to receive(:send_segment)
 
         Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.base_trace {}
+          Aws::Xray::Context.current.start_segment {}
         end
       end
     end
@@ -24,7 +24,7 @@ RSpec.describe Aws::Xray::Context do
         expect(Aws::Xray::Client).to receive(:send_segment)
 
         Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.base_trace {}
+          Aws::Xray::Context.current.start_segment {}
         end
       end
     end
@@ -58,11 +58,11 @@ RSpec.describe Aws::Xray::Context do
       allow(Aws::Xray.config).to receive(:client_options).and_return(host: server.addr[2], port: server.addr[1])
 
       described_class.with_new_context('test-app', trace) do
-        Aws::Xray::Context.current.base_trace do
+        Aws::Xray::Context.current.start_segment do
           threads = 100.times.map do |i|
             Thread.new(Aws::Xray::Context.current.copy) {|context|
               Aws::Xray::Context.with_given_context(context) do
-                Aws::Xray::Context.current.child_trace(name: i.to_s, remote: false) do |sub|
+                Aws::Xray::Context.current.start_subsegment(name: i.to_s, remote: false) do |sub|
                   # pass
                 end
               end
@@ -94,9 +94,9 @@ RSpec.describe Aws::Xray::Context do
     context 'when not set' do
       it 'does not overwrite' do
         Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.base_trace do
-            Aws::Xray::Context.current.child_trace(name: 'name1', remote: false) do
-              Aws::Xray::Context.current.child_trace(name: 'name2', remote: false) {}
+          Aws::Xray::Context.current.start_segment do
+            Aws::Xray::Context.current.start_subsegment(name: 'name1', remote: false) do
+              Aws::Xray::Context.current.start_subsegment(name: 'name2', remote: false) {}
             end
           end
         end
@@ -115,11 +115,11 @@ RSpec.describe Aws::Xray::Context do
     context 'when set' do
       it 'overwrites sub segment at once' do
         Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.base_trace do
+          Aws::Xray::Context.current.start_segment do
             Aws::Xray::Context.current.overwrite(name: 'overwrite') do
               Aws::Xray::Context.current.overwrite(name: 'overwrite2') do
-                Aws::Xray::Context.current.child_trace(name: 'name1', remote: false) do
-                  Aws::Xray::Context.current.child_trace(name: 'name2', remote: false) {}
+                Aws::Xray::Context.current.start_subsegment(name: 'name1', remote: false) do
+                  Aws::Xray::Context.current.start_subsegment(name: 'name2', remote: false) {}
                 end
               end
             end

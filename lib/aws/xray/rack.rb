@@ -27,7 +27,7 @@ module Aws
         env[TRACE_ENV] = trace.to_header_value
 
         Context.with_new_context(@name, trace) do
-          Context.current.base_trace do |seg|
+          Context.current.start_segment do |seg|
             seg.set_http_request(Request.build_from_rack_env(env))
             status, headers, body = @app.call(env)
             length = headers['Content-Length'] || 0

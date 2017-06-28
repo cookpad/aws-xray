@@ -26,7 +26,7 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
   def build_client_thread(&block)
     Thread.new(block) do
       Aws::Xray::Context.with_new_context('test-app', trace) do
-        Aws::Xray::Context.current.base_trace do
+        Aws::Xray::Context.current.start_segment do
           block.call
         end
       end

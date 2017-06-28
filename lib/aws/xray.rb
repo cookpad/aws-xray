@@ -26,7 +26,7 @@ module Aws
     def self.trace(name: nil)
       name = name || config.name || raise(MissingNameError)
       Context.with_new_context(name, Trace.generate) do
-        Context.current.base_trace do |seg|
+        Context.current.start_segment do |seg|
           yield seg
         end
       end

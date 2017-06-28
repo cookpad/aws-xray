@@ -60,7 +60,7 @@ RSpec.describe Aws::Xray do
       it 'overwrites name' do
         Aws::Xray.trace(name: 'test') do
           Aws::Xray.overwrite(name: 'overwrite') do
-            Aws::Xray::Context.current.child_trace(name: 'name1', remote: false) {}
+            Aws::Xray::Context.current.start_subsegment(name: 'name1', remote: false) {}
           end
         end
 

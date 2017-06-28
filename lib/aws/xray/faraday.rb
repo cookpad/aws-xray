@@ -17,7 +17,7 @@ module Aws
 
         name = @name || req_env.request_headers['Host'] || "unknown-request-from-#{Context.current.name}"
 
-        Context.current.child_trace(remote: true, name: name) do |sub|
+        Context.current.start_subsegment(remote: true, name: name) do |sub|
           propagate_trace = sub.generate_trace
           req_env.request_headers[TRACE_HEADER] = propagate_trace.to_header_value
           sub.set_http_request(Request.build_from_faraday_env(req_env))
