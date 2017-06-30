@@ -24,9 +24,9 @@ module Aws
 
     class << self
       # @param [String] name a logical name of this tracing context.
-      def trace(name: nil)
+      def trace(name: nil, trace: Trace.generate)
         name = name || config.name || raise(MissingNameError)
-        Context.with_new_context(name, Trace.generate) do
+        Context.with_new_context(name, trace) do
           Context.current.start_segment do |seg|
             yield seg
           end
