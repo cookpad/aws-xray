@@ -22,24 +22,26 @@ module Aws
     end
     Worker.reset(Worker::Configuration.new)
 
-    # @param [String] name a logical name of this tracing context.
-    def self.trace(name: nil)
-      name = name || config.name || raise(MissingNameError)
-      Context.with_new_context(name, Trace.generate) do
-        Context.current.start_segment do |seg|
-          yield seg
+    class << self
+      # @param [String] name a logical name of this tracing context.
+      def trace(name: nil)
+        name = name || config.name || raise(MissingNameError)
+        Context.with_new_context(name, Trace.generate) do
+          Context.current.start_segment do |seg|
+            yield seg
+          end
         end
       end
-    end
 
-    # Overwrite under lying tracing name at once. If current context does not
-    # set to current thread, do nothing.
-    # @param [String] name
-    def self.overwrite(name:, &block)
-      if Context.started?
-        Context.current.overwrite(name: name, &block)
-      else
-        block.call
+      # Overwrite under lying tracing name at once. If current context does not
+      # set to current thread, do nothing.
+      # @param [String] name
+      def overwrite(name:, &block)
+        if Context.started?
+          Context.current.overwrite(name: name, &block)
+        else
+          block.call
+        end
       end
     end
   end
