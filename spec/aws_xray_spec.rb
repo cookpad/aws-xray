@@ -46,9 +46,81 @@ RSpec.describe Aws::Xray do
     end
   end
 
+  describe '.started?' do
+    context 'when tracing context is started' do
+      it 'returns true' do
+        Aws::Xray.trace do
+          expect(Aws::Xray.started?).to eq(true)
+        end
+      end
+    end
+
+    context 'when tracing context is not started' do
+      it 'returns false' do
+        expect(Aws::Xray.started?).to eq(false)
+      end
+    end
+  end
+
+  describe '.current_context' do
+    context 'when tracing context is started' do
+      it 'returns current context' do
+        Aws::Xray.trace do
+          expect(Aws::Xray.current_context).to be_a(Aws::Xray::Context)
+        end
+      end
+    end
+
+    context 'when tracing context is not started' do
+      it 'raises Aws::Xray::NotSetError' do
+        expect { Aws::Xray.current_context }.to raise_error(Aws::Xray::NotSetError)
+      end
+    end
+  end
+
+  describe '.start_subsegment' do
+    context 'when tracing context is started' do
+      it 'yields real subsegment' do
+        Aws::Xray.trace do
+          Aws::Xray.start_subsegment(name: 'a', remote: false) do |sub|
+            expect(sub).to be_a(Aws::Xray::Subsegment)
+            expect(sub.name).to eq('a')
+          end
+        end
+      end
+    end
+
+    context 'when tracing context is not started' do
+      it 'yields null subsegment' do
+        Aws::Xray.start_subsegment(name: 'a', remote: false) do |sub|
+          expect(sub).to be_a(Aws::Xray::Subsegment)
+          expect(sub.name).not_to eq('a')
+        end
+      end
+    end
+  end
+
+  describe '.start_subsegment' do
+    context 'when tracing context is started' do
+      it 'disables specific tracing' do
+        Aws::Xray.trace do
+          Aws::Xray.disable_trace(:test) do
+            expect(Aws::Xray.current_context.disabled?(:test)).to eq(true)
+          end
+        end
+      end
+    end
+
+    context 'when tracing context is not started' do
+      it 'calls given block' do
+        expect { Aws::Xray.disable_trace(:test) { } }.not_to raise_error
+      end
+    end
+  end
+
   describe '.overwrite' do
     context 'when the context is not set' do
-      it 'does nothing' do
+      it 'calls given block' do
         expect { Aws::Xray.overwrite(name: 'overwrite') { } }.not_to raise_error
 
         sent_jsons = io.tap(&:rewind).read.split("\n")

@@ -10,6 +10,11 @@ module Aws
         new(name: name, trace: trace, parent_id: parent_id, remote: remote)
       end
 
+      # Build a subsegment as null object.
+      def self.build_null
+        build(Trace.generate, SecureRandom.hex(8), remote: true, name: '')
+      end
+
       TYPE_NAME = 'subsegment'.freeze
 
       def initialize(name:, trace:, parent_id:, remote:)
