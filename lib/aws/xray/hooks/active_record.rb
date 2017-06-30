@@ -7,7 +7,7 @@ module Aws
       module ActiveRecord
         extend self
 
-        IGNORE_NAMES = [nil, 'SCHEMA']
+        IGNORE_NAMES = ['SCHEMA', 'ActiveRecord::SchemaMigration Load']
 
         # event has #name, #time, #end, #duration, #payload
         # payload has #sql, #name, #connection_id, #binds, #cached
@@ -81,10 +81,6 @@ module Aws
 end
 
 # maybe old version?
-if defined?(ActiveSupport::Notifications) && ActiveSupport::Notifications.respond_to?(:subscribe)
-  ActiveSupport::Notifications.subscribe('sql.active_record') do |*args|
-    Aws::Xray::Hooks::ActiveRecord.record(ActiveSupport::Notifications::Event.new(*args))
-  end
-else
-  $stderr.puts('Skip hooking active record events because this version of active record is not supported')
+ActiveSupport::Notifications.subscribe('sql.active_record') do |*args|
+  Aws::Xray::Hooks::ActiveRecord.record(ActiveSupport::Notifications::Event.new(*args))
 end
