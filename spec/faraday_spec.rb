@@ -53,6 +53,13 @@ RSpec.describe Aws::Xray::Faraday do
       expect(body['http']['response']['status']).to eq(200)
       expect(body['http']['response']['content_length']).to be_nil
 
+      expect(body['metadata']['caller']['stack'].size).not_to eq(0)
+      expect(body['metadata']['caller']['stack'].first).to match(
+        'path' => 'lib/aws/xray/faraday.rb',
+        'line' => be_a(String),
+        'label' => 'in `block (2 levels) in call\'',
+      )
+
       expect(res.body).to eq("Root=1-67891233-abcdef012345678912345678;Sampled=1;Parent=#{body['id']}")
     end
   end

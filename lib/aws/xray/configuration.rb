@@ -41,6 +41,7 @@ module Aws
         @worker = Aws::Xray::Worker::Configuration.new
         @sampling_rate = Float(ENV['AWS_XRAY_SAMPLING_RATE'] || 0.001)
         @solr_hook_name = 'solr'
+        @record_caller_of_http_requests = false
       end
 
       # @param [String] name Logical service name for this application.
@@ -103,6 +104,10 @@ module Aws
       # @param [String] solr_hook_name
       # @return [String]
       attr_accessor :solr_hook_name
+
+      # @param [Boolean] record_caller_of_http_requests
+      # @return [Boolean]
+      attr_accessor :record_caller_of_http_requests
     end
   end
 end

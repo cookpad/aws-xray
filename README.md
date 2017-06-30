@@ -215,6 +215,10 @@ Optionaly, aws-xray offers an error handler which integrats with Sentry. To use 
 Aws::Xray.config.segment_sending_error_handler = Aws::Xray::ErrorHandlerWithSentry.new
 ```
 
+### Recording caller of HTTP requests
+Set `Aws::Xray.config.record_caller_of_http_requests = true` if you want investigate the caller of specific HTTP requests.
+It records caller of net/http and Faraday middleware.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
