@@ -4,6 +4,7 @@ require 'aws/xray/request'
 require 'aws/xray/response'
 require 'aws/xray/error'
 require 'aws/xray/annotation_normalizer'
+require 'aws/xray/caller_builder'
 
 module Aws
   module Xray

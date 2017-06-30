@@ -63,6 +63,13 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
 
     SegmentValidator.call(body.to_json)
 
+    expect(body['metadata']['caller']['stack'].size).not_to eq(0)
+    expect(body['metadata']['caller']['stack'].first).to match(
+      'path' => 'lib/aws/xray/hooks/net_http.rb',
+      'line' => be_a(String),
+      'label' => 'in `block in request_with_aws_xray\'',
+    )
+
     server_thread.kill
     client_thread.kill
   end

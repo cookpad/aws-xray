@@ -30,6 +30,7 @@ module Aws
             res = request_without_aws_xray(req, *args, &block)
 
             sub.set_http_response_with_error(res.code.to_i, res['Content-Length'], remote: true)
+            sub.add_metadata(CallerBuilder.call) if Aws::Xray.config.record_caller_of_http_requests
             res
           end
         end

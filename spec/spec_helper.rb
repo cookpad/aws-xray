@@ -24,6 +24,7 @@ Aws::Xray.config.version = -> { 'deadbeef' }
 Aws::Xray.config.worker = Aws::Xray::Worker::Configuration.new(num: 1)
 Aws::Xray.config.sampling_rate = 1
 Aws::Xray.config.solr_hook_name = 'solr-test'
+Aws::Xray.config.record_caller_of_http_requests = true
 
 require 'json-schema'
 # Json schema for `cause` object is invalid now.

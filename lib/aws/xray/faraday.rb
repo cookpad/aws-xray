@@ -25,6 +25,7 @@ module Aws
           res = Context.current.disable_trace(:net_http) { @app.call(req_env) }
           res.on_complete do |res_env|
             sub.set_http_response_with_error(res_env.status, res_env.response_headers['Content-Length'], remote: true)
+            sub.add_metadata(CallerBuilder.call) if Aws::Xray.config.record_caller_of_http_requests
           end
         end
       end
