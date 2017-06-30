@@ -86,8 +86,16 @@ module Aws
       end
       alias_method :set_metadata, :add_metadata
 
+      def start(now = Time.now)
+        @start_time = now.to_f
+      end
+
       def finish(now = Time.now)
         @end_time = now.to_f
+      end
+
+      def finished?
+        !!@end_time
       end
 
       def to_json
@@ -126,12 +134,6 @@ module Aws
         end
         h[:parent_id] = @parent_id if @parent_id
         h
-      end
-
-      private
-
-      def start(now = Time.now)
-        @start_time = now.to_f
       end
     end
   end

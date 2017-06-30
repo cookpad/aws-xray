@@ -38,7 +38,41 @@ module SegmentValidator
   end
 end
 
+require 'active_record'
+ActiveRecord::Base.establish_connection(
+  adapter: 'sqlite3',
+  database: 'db/test.sqlite3',
+  host: 'localhost',
+  username: 'root',
+  password: 'pass',
+  timeout: 1,
+)
+
+class Item < ActiveRecord::Base
+end
+
 RSpec.configure do |config|
+  config.before(:suite) do
+    FileUtils.rm_rf(File.expand_path('../db', __dir__))
+    FileUtils.mkdir_p(File.expand_path('../db', __dir__))
+
+    Item.connection.execute(<<-SQL
+      create table items (
+        id integer primary key autoincrement,
+        name text not null
+      )
+    SQL
+    )
+  end
+
+  config.after(:each) do
+    Item.delete_all
+  end
+
+  config.after(:suite) do
+    FileUtils.rm_rf(File.expand_path('../db', __dir__))
+  end
+
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end

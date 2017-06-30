@@ -1,4 +1,5 @@
 require 'aws/xray/segment'
+require 'aws/xray/sql'
 
 module Aws
   module Xray
@@ -15,6 +16,7 @@ module Aws
         super(name: name, trace_id: trace.root, parent_id: parent_id)
         @trace = trace
         @remote = !!remote
+        @sql = nil
       end
 
       # Set traced=false if the downstream call is not traced app.
@@ -23,6 +25,11 @@ module Aws
       def set_http_request(env, traced: false)
         super(env)
         @http_request.traced = traced
+      end
+
+      # @param [Aws::Xray::Sql] sql
+      def set_sql(sql)
+        @sql = sql
       end
 
       def to_h
@@ -34,6 +41,7 @@ module Aws
         end
         h[:type] = TYPE_NAME
         h[:namespace] = 'remote' if @remote
+        h[:sql] = @sql.to_h if @sql
         h
       end
 
