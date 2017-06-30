@@ -56,7 +56,7 @@ RSpec.describe Aws::Xray::Rack do
       builder = Rack::Builder.new
       builder.use described_class
       builder.run -> (_) {
-        Aws::Xray::Context.current.start_subsegment(remote: false, name: 'funccall_f') {}
+        Aws::Xray.start_subsegment(remote: false, name: 'funccall_f') {}
         [200, {}, ['hello']]
       }
       builder

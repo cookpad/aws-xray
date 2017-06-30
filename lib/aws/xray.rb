@@ -46,6 +46,12 @@ module Aws
         Context.current
       end
 
+      # @param [Aws::Xray::Context] context copied context
+      # @return [Object] result of given block
+      def with_given_context(context, &block)
+        Context.with_given_context(context, &block)
+      end
+
       # @yield [Aws::Xray::Subsegment] null subsegment
       # @return [Object] result of given block
       def start_subsegment(name:, remote:, &block)

@@ -26,15 +26,13 @@ module Aws
         env[ORIGINAL_TRACE_ENV] = env[TRACE_ENV] if env[TRACE_ENV] # just for the record
         env[TRACE_ENV] = trace.to_header_value
 
-        Context.with_new_context(@name, trace) do
-          Context.current.start_segment do |seg|
-            seg.set_http_request(Request.build_from_rack_env(env))
-            status, headers, body = @app.call(env)
-            length = headers['Content-Length'] || 0
-            seg.set_http_response_with_error(status, length, remote: false)
-            headers[TRACE_HEADER] = trace.to_header_value
-            [status, headers, body]
-          end
+        Aws::Xray.trace(name: @name, trace: trace) do |seg|
+          seg.set_http_request(Request.build_from_rack_env(env))
+          status, headers, body = @app.call(env)
+          length = headers['Content-Length'] || 0
+          seg.set_http_response_with_error(status, length, remote: false)
+          headers[TRACE_HEADER] = trace.to_header_value
+          [status, headers, body]
         end
       end
 

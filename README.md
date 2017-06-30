@@ -87,7 +87,7 @@ end
 Aws::Xray.trace(name: 'my-app-batch') do |seg|
   client.get('/foo')
 
-  Aws::Xray::Context.current.start_subsegment(name: 'fetch-user', remote: true) do |sub|
+  Aws::Xray.start_subsegment(name: 'fetch-user', remote: true) do |sub|
     # DB access or something to trace.
   end
 end
@@ -113,7 +113,7 @@ Net::HTTP.start(host, port) do |http|
 end
 ```
 
-If you can't access headers, e.g. external client library like aws-sdk or dogapi-rb, setup subsegment name by `Aws::Xray::Context#overwrite`:
+If you can't access headers, e.g. external client library like aws-sdk or dogapi-rb, setup subsegment name by `Aws::Xray.overwrite`:
 
 ```ruby
 client = Aws::Sns::Client.new
@@ -135,8 +135,8 @@ Aws::Xray.config.solr_hook_name = 'solr-development'
 Tracing context is thread local. To pass current tracing context, copy current tracing context:
 
 ```ruby
-Thread.new(Aws::Xray::Context.current.copy) do |context|
-  Aws::Xray::Context.with_given_context(context) do
+Thread.new(Aws::Xray.current_context.copy) do |context|
+  Aws::Xray.with_given_context(context) do
     # Do something
   end
 end

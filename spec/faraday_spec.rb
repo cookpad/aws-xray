@@ -20,11 +20,7 @@ RSpec.describe Aws::Xray::Faraday do
 
   context 'without name option' do
     it 'uses host header value' do
-      res = Aws::Xray::Context.with_new_context('test-app', trace) do
-        Aws::Xray::Context.current.start_segment do
-          client.get('/foo')
-        end
-      end
+      res = Aws::Xray.trace(name: 'test-app', trace: trace) { client.get('/foo') }
       expect(res.status).to eq(200)
       expect(res.headers).to eq({})
 
@@ -68,11 +64,7 @@ RSpec.describe Aws::Xray::Faraday do
         builder.adapter :test, stubs
       end
 
-      res = Aws::Xray::Context.with_new_context('test-app', trace) do
-        Aws::Xray::Context.current.start_segment do
-          client.get('/foo')
-        end
-      end
+      res = Aws::Xray.trace(name: 'test-app', trace: trace) { client.get('/foo') }
       expect(res.status).to eq(200)
       expect(res.headers).to eq({})
 
@@ -95,11 +87,7 @@ RSpec.describe Aws::Xray::Faraday do
       end
 
       it 'traces remote fault' do
-        res = Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.start_segment do
-            client.get('/foo')
-          end
-        end
+        res = Aws::Xray.trace(name: 'test-app', trace: trace) { client.get('/foo') }
         expect(res.status).to eq(500)
 
         io.rewind
@@ -133,11 +121,7 @@ RSpec.describe Aws::Xray::Faraday do
       end
 
       it 'traces remote fault' do
-        res = Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.start_segment do
-            client.get('/foo')
-          end
-        end
+        res = Aws::Xray.trace(name: 'test-app', trace: trace) { client.get('/foo') }
         expect(res.status).to eq(429)
 
         sent_jsons = io.tap(&:rewind).read.split("\n")
@@ -161,11 +145,7 @@ RSpec.describe Aws::Xray::Faraday do
       end
 
       it 'traces remote fault' do
-        res = Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.start_segment do
-            client.get('/foo')
-          end
-        end
+        res = Aws::Xray.trace(name: 'test-app', trace: trace) { client.get('/foo') }
         expect(res.status).to eq(400)
 
         sent_jsons = io.tap(&:rewind).read.split("\n")
@@ -191,11 +171,7 @@ RSpec.describe Aws::Xray::Faraday do
 
     it 'traces remote fault' do
       expect {
-        Aws::Xray::Context.with_new_context('test-app', trace) do
-          Aws::Xray::Context.current.start_segment do
-            client.get('/foo')
-          end
-        end
+        Aws::Xray.trace(name: 'test-app', trace: trace) { client.get('/foo') }
       }.to raise_error('test_error')
 
       io.rewind
@@ -250,11 +226,7 @@ RSpec.describe Aws::Xray::Faraday do
     end
 
     it 'accepts name parameter' do
-      res = Aws::Xray::Context.with_new_context('test-app', trace) do
-        Aws::Xray::Context.current.start_segment do
-          client.get('/foo')
-        end
-      end
+      res = Aws::Xray.trace(name: 'test-app', trace: trace) { client.get('/foo') }
       expect(res.status).to eq(200)
 
       io.rewind
