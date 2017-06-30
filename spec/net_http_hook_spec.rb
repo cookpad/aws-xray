@@ -25,12 +25,7 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
 
   def build_client_thread(&block)
     Thread.new(block) do
-      Aws::Xray::Context.with_new_context('test-app', trace) do
-        Aws::Xray::Context.current.start_segment do
-          block.call
-        end
-      end
-
+      Aws::Xray.trace(name: 'test-app', trace: trace) { block.call }
       # For waiting sending segments in this thread.
       queue.push(nil)
     end
@@ -111,7 +106,7 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
   it 'returns net_http response even if disabled tracing' do
     server_thread = build_server_thread
     client_thread = build_client_thread do
-      Aws::Xray::Context.current.disable_trace(:net_http) do
+      Aws::Xray.disable_trace(:net_http) do
         Net::HTTP.start(host, port) do |http|
           uri = URI("http://#{host}:#{port}/hello")
           response = http.get(uri, { 'X-Aws-Xray-Name' => 'target-app' })
