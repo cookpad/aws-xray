@@ -18,6 +18,7 @@ require 'aws/xray/hooks/all'
 require 'fileutils'
 require 'rack/test'
 require 'webmock'
+require 'sentry-raven'
 
 Aws::Xray.config.name = 'test-app'
 Aws::Xray.config.version = -> { 'deadbeef' }
@@ -25,6 +26,7 @@ Aws::Xray.config.worker = Aws::Xray::Worker::Configuration.new(num: 1)
 Aws::Xray.config.sampling_rate = 1
 Aws::Xray.config.solr_hook_name = 'solr-test'
 Aws::Xray.config.record_caller_of_http_requests = true
+Aws::Xray.config.default_annotation = Aws::Xray.config.default_annotation.merge('a' => 'b')
 
 require 'json-schema'
 # Json schema for `cause` object is invalid now.

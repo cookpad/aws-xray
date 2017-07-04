@@ -26,11 +26,7 @@ Error: #{error}
       ERROR_LEVEL = 'warning'.freeze
 
       def call(error, payload, host:, port:)
-        if defined?(Raven)
-          ::Raven.capture_exception(error, level: ERROR_LEVEL, extra: { 'payload' => payload })
-        else
-          $stderr.puts('ErrorHandlerWithSentry is configured but `Raven` is undefined.')
-        end
+        ::Raven.capture_exception(error, level: ERROR_LEVEL, extra: { 'payload' => payload })
       end
     end
   end

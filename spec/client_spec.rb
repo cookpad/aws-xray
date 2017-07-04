@@ -137,6 +137,25 @@ RSpec.describe Aws::Xray::Client do
       end
     end
 
+    context 'when queue is full and error handler raises errors' do
+      around do |ex|
+        back = Aws::Xray.config.segment_sending_error_handler
+        Aws::Xray.config.segment_sending_error_handler = -> (*) { raise 'test error' }
+        ex.run
+        Aws::Xray.config.segment_sending_error_handler = back
+      end
+      before do
+        allow(Aws::Xray::Worker.instance_variable_get('@queue')).to receive(:push).and_raise(ThreadError)
+        allow(Aws::Xray.config).to receive(:client_options).and_return(host: '127.0.0.1', port: 0)
+      end
+
+      it 'rescues the error and log them' do
+        expect {
+          Aws::Xray::Client.send_segment(segment); wait;
+        }.to output(/test error/).to_stderr
+      end
+    end
+
     context 'when error handler raises errors' do
       around do |ex|
         back = Aws::Xray.config.segment_sending_error_handler
@@ -149,7 +168,7 @@ RSpec.describe Aws::Xray::Client do
       it 'does not do nothing' do
         expect {
           Aws::Xray::Client.send_segment(segment); wait;
-        }.to output(/ErrorHandlerWithSentry is configured but `Raven` is undefined./).to_stderr
+        }.to output('').to_stderr
       end
     end
   end

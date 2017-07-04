@@ -67,6 +67,7 @@ RSpec.describe Aws::Xray do
       it 'returns current context' do
         Aws::Xray.trace do
           expect(Aws::Xray.current_context).to be_a(Aws::Xray::Context)
+          expect { Aws::Xray.with_given_context(Aws::Xray.current_context.copy) { } }.not_to raise_error
         end
       end
     end

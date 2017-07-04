@@ -137,4 +137,16 @@ RSpec.describe Aws::Xray::Context do
       end
     end
   end
+
+  describe '#start_subsegment' do
+    context 'when segment did not start yet' do
+      it 'raises SegmentDidNotStartError' do
+        Aws::Xray::Context.with_new_context('test-app', trace) do
+          expect {
+            Aws::Xray::Context.current.start_subsegment(name: 'f', remote: false) {}
+          }.to raise_error(Aws::Xray::SegmentDidNotStartError)
+        end
+      end
+    end
+  end
 end
