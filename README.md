@@ -4,7 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/taiki45/aws-xray/badge.svg)](https://coveralls.io/github/taiki45/aws-xray)
 
 The unofficial AWS X-Ray Tracing SDK for Ruby.
-It enables you to capture in-coming HTTP requests and out-going HTTP requests and send them to xray-agent automatically.
+It enables you to capture in-coming HTTP requests and out-going HTTP requests and send them to X-Ray daemon automatically.
 
 AWS X-Ray is a distributed tracing system. See more detail about AWS X-Ray at [official document](http://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html).
 If you want to know what is distributed tracing, what is problems behind, etc.., please refer [Google's Dapper paper](https://research.google.com/pubs/pub36356.html).
