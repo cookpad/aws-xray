@@ -69,9 +69,7 @@ module Aws
         self.class.new(@name.dup, @trace.copy, @base_segment_id ? @base_segment_id.dup : nil)
       end
 
-      # Rescue all exceptions and record the exception to the segment.
-      # Then re-raise the exception.
-      #
+      # Use `Aws::Xray.trace` instead of this.
       # @yield [Aws::Xray::Segment]
       # @return [Object] A value which given block returns.
       def start_segment
@@ -90,6 +88,7 @@ module Aws
       end
       alias_method :base_trace, :start_segment
 
+      # Use `Aws::Xray.start_subsegment` instead of this.
       # @param [Boolean] remote
       # @param [String] name Arbitrary name of the sub segment. e.g. "funccall_f".
       # @yield [Aws::Xray::Subsegment]
@@ -110,9 +109,7 @@ module Aws
       end
       alias_method :child_trace, :start_subsegment
 
-      # Temporary disabling tracing for given id in given block.
-      # CAUTION: the disabling will NOT be propagated between threads!!
-      #
+      # Use `Aws::Xray.disable_trace` instead of this.
       # @param [Symbol] id must be unique between tracing methods.
       def disable_trace(id)
         @disabled_ids << id
@@ -124,15 +121,13 @@ module Aws
         end
       end
 
+      # Use `Aws::Xray.disabled?` instead of this.
+      # @param [Symbol] id
+      # @return [Boolean]
       def disabled?(id)
         @disabled_ids.include?(id)
       end
 
-      # CAUTION: the injection will NOT be propagated between threads!!
-      #
-      # Temporary overwrite subsegment with the name in the block. The
-      # overwriting will be occured only one time.
-      #
       # @param [String] name
       def overwrite(name:)
         return yield if @subsegment_name

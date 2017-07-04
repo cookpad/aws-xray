@@ -100,12 +100,12 @@ RSpec.describe Aws::Xray do
     end
   end
 
-  describe '.start_subsegment' do
+  describe '.disable_trace and .disabled?' do
     context 'when tracing context is started' do
       it 'disables specific tracing' do
         Aws::Xray.trace do
           Aws::Xray.disable_trace(:test) do
-            expect(Aws::Xray.current_context.disabled?(:test)).to eq(true)
+            expect(Aws::Xray.disabled?(:test)).to eq(true)
           end
         end
       end
@@ -114,6 +114,7 @@ RSpec.describe Aws::Xray do
     context 'when tracing context is not started' do
       it 'calls given block' do
         expect { Aws::Xray.disable_trace(:test) { } }.not_to raise_error
+        expect { Aws::Xray.disabled?(:test) { } }.not_to raise_error
       end
     end
   end
