@@ -157,13 +157,9 @@ docker run --link xray:xray --env AWS_XRAY_LOCATION=xray:2000 my-application
 ### Sampling
 Sampling rate should be a float within 0 to 1. Both 0 and 1 are acceptable.
 e.g. 0 means never sampled, 1 means always sampled, 0.3 means 30% of requests (or traces in not Rack app) will be sampled.
-The default sampling rate is `0.001`, which means 0.1% of requests will be sampled.
+The default sampling rate is undefined so you should set your own sampling rate on production system. 
 
-Set sampling rate with `AWS_XRAY_SAMPLING_RATE` env var or:
-
-```ruby
-Aws::Xray.config.sampling_rate = 0.1
-```
+Set sampling rate with `AWS_XRAY_SAMPLING_RATE` env var.
 
 ### Excluded paths
 To avoid tracing health checking requests, use "excluded paths" configuration.

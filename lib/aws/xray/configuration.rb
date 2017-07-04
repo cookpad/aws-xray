@@ -39,7 +39,7 @@ module Aws
         @default_metadata = DEFAULT_METADATA
         @segment_sending_error_handler = DefaultErrorHandler.new($stderr)
         @worker = Aws::Xray::Worker::Configuration.new
-        @sampling_rate = Float(ENV['AWS_XRAY_SAMPLING_RATE'] || 0.001)
+        @sampling_rate = Float(ENV['AWS_XRAY_SAMPLING_RATE'] || 1.0)
         @solr_hook_name = 'solr'
         @record_caller_of_http_requests = false
       end
@@ -92,7 +92,7 @@ module Aws
         conf
       end
 
-      # Default is 0.1%.
+      # Default is undefined.
       # @param [Float] sampling_rate
       # @return [Float]
       attr_accessor :sampling_rate
