@@ -27,7 +27,8 @@ module Aws
             req[TRACE_HEADER] = propagate_trace.to_header_value
             sub.set_http_request(request_record)
 
-            res = request_without_aws_xray(req, *args, &block)
+            # Don't record twice if down-steam caller calls Net::HTTP#request again.
+            res = Context.current.disable_trace(:net_http) { request_without_aws_xray(req, *args, &block) }
 
             sub.set_http_response_with_error(res.code.to_i, res['Content-Length'], remote: true)
             sub.add_metadata(CallerBuilder.call) if Aws::Xray.config.record_caller_of_http_requests
