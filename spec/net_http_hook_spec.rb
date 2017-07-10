@@ -110,6 +110,25 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
     client_thread.kill
   end
 
+  it 'does not record twice with non-started net/http instance' do
+    server_thread = build_server_thread
+    client_thread = build_client_thread do
+      http = Net::HTTP.new(host, port)
+      response = http.get('/hello', { 'X-Aws-Xray-Name' => 'target-app' })
+      queue.push(response)
+    end
+
+    request_string, response, _ = queue.pop, queue.pop, queue.pop
+    expect(request_string).to match(/X-Amzn-Trace-Id/)
+    expect(response.code).to eq('200')
+
+    sent_jsons = io.tap(&:rewind).read.split("\n")
+    expect(sent_jsons.size).to eq(4)
+
+    server_thread.kill
+    client_thread.kill
+  end
+
   it 'returns net_http response even if disabled tracing' do
     server_thread = build_server_thread
     client_thread = build_client_thread do
