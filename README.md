@@ -13,9 +13,9 @@ If you want to know what is distributed tracing, what is problems behind, etc..,
 ## Features
 aws-xray has full feautres to build and send tracing data to AWS X-Ray.
 
-- Propagatin support in both single and multi thread environment.
+- Propagation support in both single and multi thread environments.
 - Instrumentation for major libraries.
-- Recording HTTP request/response and errors.
+- Recording HTTP requests/responses and errors.
 - Annotation and metadata support.
 - Sampling.
 
@@ -28,7 +28,7 @@ aws-xray has full feautres to build and send tracing data to AWS X-Ray.
 
 ## Getting started
 ### Rails app
-Just require `aws/xray/rails`. It uses your application name by default. e.g. `Legacy::MyBlog` -> `legacy-my-blog`.
+Just require `aws/xray/rails`. It uses your application name as a service name by default. e.g. `Legacy::MyBlog` -> `legacy-my-blog`.
 
 ```ruby
 # Gemfile
@@ -38,7 +38,7 @@ gem 'aws-xray', require: ['aws/xray/rails', 'aws/xray/hooks/net_http']
 Requiring `aws/xray/rails` inserts Rack middleware to the middleware stack and the middleware automatically starts tracing context. Another requiring `aws/xray/hooks/net_http` inserts a hook to net/http and it records out-going HTTP requests/responses automatically.
 
 Then setup [X-Ray daemon](http://docs.aws.amazon.com/xray/latest/devguide/xray-daemon.html) in your runtime environment.
-Once the daemon is ready, run your application with some environment variable required by aws-xray gem.
+Once the daemon is ready, run your application with some environment variables required by aws-xray gem.
 
 - `AWS_XRAY_LOCATION`: Point to X-Ray daemon's bind address and port. e.g. `localhost:2000`.
 - `AWS_XRAY_SAMPLING_RATE`: Set sampling rate. If you are just checking behavior, you can disable sampling by setting `1`.
@@ -72,7 +72,7 @@ docker run --link xray:xray --env AWS_XRAY_LOCATION=xray:2000 my-application
 ### Sampling
 Sampling rate should be a float within 0 to 1. Both 0 and 1 are acceptable.
 e.g. 0 means never sampled, 1 means always sampled, 0.3 means 30% of requests (or traces in not Rack app) will be sampled.
-The default sampling rate is undefined so you should set your own sampling rate on production system. 
+The default sampling rate is undefined so you should set your own sampling rate on production systems. 
 
 Set sampling rate with `AWS_XRAY_SAMPLING_RATE` env var.
 
