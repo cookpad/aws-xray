@@ -41,7 +41,7 @@ module Aws
         private
 
         def pass_trace_header?(host)
-          !Aws::Xray.config.trace_header_excluded_hosts.find {|h| h === host }
+          !!Aws::Xray.config.trace_header_whitelist_hosts.find {|h| h === host }
         end
       end
     end
