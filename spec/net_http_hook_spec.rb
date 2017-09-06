@@ -151,4 +151,75 @@ RSpec.describe Aws::Xray::Hooks::NetHttp do
     server_thread.kill
     client_thread.kill
   end
+
+  describe 'whitelist hosts about passing trace header' do
+    context 'when string' do
+      before { allow(Aws::Xray.config).to receive(:trace_header_whitelist_hosts).and_return(['example.com']) }
+
+      it 'does not pass trace header' do
+        server_thread = build_server_thread
+        client_thread = build_client_thread do
+          http = Net::HTTP.new(host, port)
+          response = http.get('/hello', { 'X-Aws-Xray-Name' => 'target-app' })
+          queue.push(response)
+        end
+
+        request_string, response, _ = queue.pop, queue.pop, queue.pop
+        expect(request_string).not_to match(/X-Amzn-Trace-Id/)
+        expect(response.code).to eq('200')
+
+        sent_jsons = io.tap(&:rewind).read.split("\n")
+        expect(sent_jsons.size).to eq(4)
+
+        server_thread.kill
+        client_thread.kill
+      end
+    end
+
+    context 'when regexp matches host' do
+      before { allow(Aws::Xray.config).to receive(:trace_header_whitelist_hosts).and_return([/.*\.0\.0\.1/]) }
+
+      it 'passes trace header' do
+        server_thread = build_server_thread
+        client_thread = build_client_thread do
+          http = Net::HTTP.new(host, port)
+          response = http.get('/hello', { 'X-Aws-Xray-Name' => 'target-app' })
+          queue.push(response)
+        end
+
+        request_string, response, _ = queue.pop, queue.pop, queue.pop
+        expect(request_string).to match(/X-Amzn-Trace-Id/)
+        expect(response.code).to eq('200')
+
+        sent_jsons = io.tap(&:rewind).read.split("\n")
+        expect(sent_jsons.size).to eq(4)
+
+        server_thread.kill
+        client_thread.kill
+      end
+    end
+
+    context 'when regexp does not match host' do
+      before { allow(Aws::Xray.config).to receive(:trace_header_whitelist_hosts).and_return([/.*\.1\.1\.1/]) }
+
+      it 'does not passes trace header' do
+        server_thread = build_server_thread
+        client_thread = build_client_thread do
+          http = Net::HTTP.new(host, port)
+          response = http.get('/hello', { 'X-Aws-Xray-Name' => 'target-app' })
+          queue.push(response)
+        end
+
+        request_string, response, _ = queue.pop, queue.pop, queue.pop
+        expect(request_string).not_to match(/X-Amzn-Trace-Id/)
+        expect(response.code).to eq('200')
+
+        sent_jsons = io.tap(&:rewind).read.split("\n")
+        expect(sent_jsons.size).to eq(4)
+
+        server_thread.kill
+        client_thread.kill
+      end
+    end
+  end
 end

@@ -42,6 +42,7 @@ module Aws
         @sampling_rate = Float(ENV['AWS_XRAY_SAMPLING_RATE'] || 1.0)
         @solr_hook_name = 'solr'
         @record_caller_of_http_requests = false
+        @trace_header_whitelist_hosts = [/.*/]
       end
 
       # @param [String] name Logical service name for this application.
@@ -108,6 +109,10 @@ module Aws
       # @param [Boolean] record_caller_of_http_requests
       # @return [Boolean]
       attr_accessor :record_caller_of_http_requests
+
+      # @param [Array<String,Regexp>] trace_header_whitelist_hosts
+      # @return [Array<String,Regexp>]
+      attr_accessor :trace_header_whitelist_hosts
     end
   end
 end
