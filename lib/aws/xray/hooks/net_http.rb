@@ -23,8 +23,10 @@ module Aws
           )
           name = req[NAME_HEADER] || req['Host'] || address
           Context.current.start_subsegment(remote: true, name: name) do |sub|
-            propagate_trace = sub.generate_trace
-            req[TRACE_HEADER] = propagate_trace.to_header_value
+            if pass_trace_header?(address)
+              propagate_trace = sub.generate_trace
+              req[TRACE_HEADER] = propagate_trace.to_header_value
+            end
             sub.set_http_request(request_record)
 
             # Don't record twice if down-steam caller calls Net::HTTP#request again.
@@ -34,6 +36,12 @@ module Aws
             sub.add_metadata(CallerBuilder.call) if Aws::Xray.config.record_caller_of_http_requests
             res
           end
+        end
+
+        private
+
+        def pass_trace_header?(host)
+          !Aws::Xray.config.trace_header_excluded_hosts.find {|h| h === host }
         end
       end
     end

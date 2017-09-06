@@ -217,6 +217,12 @@ response = Aws::Xray.overwrite(name: 'sns') do
 end
 ```
 
+If you do not want to pass trace header to other services, control with `Aws::Xray.config.trace_header_excluded_hosts`:
+
+```
+Aws::Xray.config.trace_header_excluded_hosts = ['example.com', /.*\.example\.com/]
+```
+
 #### activerecord hook
 `require 'aws/xray/hooks/active_record'`.
 
