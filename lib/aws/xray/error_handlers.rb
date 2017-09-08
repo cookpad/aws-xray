@@ -26,7 +26,11 @@ Error: #{error}
       ERROR_LEVEL = 'warning'.freeze
 
       def call(error, payload, host:, port:)
-        ::Raven.capture_exception(error, level: ERROR_LEVEL, extra: { 'payload' => payload })
+        ::Raven.capture_exception(
+          error,
+          level: ERROR_LEVEL,
+          extra: { 'payload' => payload, 'payload_raw' => payload.unpack('H*').first }
+        )
       end
     end
   end
