@@ -71,8 +71,8 @@ docker run --link xray:xray --env AWS_XRAY_LOCATION=xray:2000 my-application
 
 ### Sampling
 Sampling rate should be a float within 0 to 1. Both 0 and 1 are acceptable.
-e.g. 0 means never sampled, 1 means always sampled, 0.3 means 30% of requests (or traces in not Rack app) will be sampled.
-The default sampling rate is undefined so you should set your own sampling rate on production systems. 
+e.g. 0 means never sampled, 1 means always sampled, 0.3 means 30% of requests (or traces in non-Rack app) will be sampled.
+e default sampling rate is undefined so you should set your own sampling rate on production systems.
 
 Set sampling rate with `AWS_XRAY_SAMPLING_RATE` env var.
 
@@ -118,9 +118,9 @@ If you want to track these errors, for example with Sentry, you can configure yo
 Aws::Xray.config.segment_sending_error_handler = MyCustomErrorHandler.new
 ```
 
-The error handler must be callable object and receive 2 arguments and 2 keyword arguments. See `Aws::Xray::DefaultErrorHandler` more detail.
+The error handler must be callable object and receive 2 arguments and 2 keyword arguments. See `Aws::Xray::DefaultErrorHandler` for more details.
 
-Optionaly, aws-xray offers an error handler which integrats with Sentry. To use it:
+Optionally, aws-xray offers an error handler which integrates with Sentry. To use it:
 
 ```ruby
 Aws::Xray.config.segment_sending_error_handler = Aws::Xray::ErrorHandlerWithSentry.new
