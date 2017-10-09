@@ -13,7 +13,7 @@ module Aws
       def call(error, payload, host:, port:)
         @io.puts(<<-EOS)
 Failed to send a segment to #{host}:#{port}:
-Segnemt:
+Segment:
 #{payload}
 Error: #{error}
 #{error.backtrace.join("\n")}
