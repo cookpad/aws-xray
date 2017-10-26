@@ -13,13 +13,13 @@ module Aws
       @post_lock = ::Mutex.new
       @pid = $$
       class << self
-        # @param [String] payload to send
+        # @param [Aws::Xray::Segment] segment to send
         # @param [Aws::Xray::Client] client
-        def post(payload)
+        def post(segment)
           Aws::Xray.config.logger.debug("#{Thread.current}: Worker.post received a job")
           @post_lock.synchronize do
             refresh_if_forked
-            @queue.push(payload)
+            @queue.push(segment)
           end
           Aws::Xray.config.logger.debug("#{Thread.current}: Worker.post pushed a job")
         rescue ThreadError => e
@@ -51,11 +51,11 @@ module Aws
         th = Thread.new(@queue) do |queue|
           loop do
             Aws::Xray.config.logger.debug("#{Thread.current}: Worker#run waits a job")
-            payload = queue.pop
+            segment = queue.pop
             Aws::Xray.config.logger.debug("#{Thread.current}: Worker#run received a job")
-            if payload
-              Client.send_payload(payload.to_s)
-              Aws::Xray.config.logger.debug("#{Thread.current}: Worker#run sent a payload")
+            if segment
+              Client.send_(segment)
+              Aws::Xray.config.logger.debug("#{Thread.current}: Worker#run sent a segment")
             else
               Aws::Xray.config.logger.debug("#{Thread.current}: Worker#run received invalid item, ignored it")
             end
