@@ -42,7 +42,7 @@ module Aws
           if str.nil?
             nil
           else
-            str.to_s.encode(__ENCODING__, invalid: :replace, undef: :replace)
+            str.to_s.encode(__ENCODING__, invalid: :replace, undef: :replace, replace: '')
           end
         end
 

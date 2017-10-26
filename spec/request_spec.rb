@@ -9,9 +9,8 @@ RSpec.describe Aws::Xray::Request do
       # \x61 = a, \xe3 = illegal bytes, \x62 = b, \x63 = c
       let(:url) { "/users/\x61\xe3\x62\x63/" }
 
-      it 'serialized successfully' do
-        # \uFFFD is default unicode character in replacing illegal bytes.
-        expect(body['url']).to eq("/users/a\uFFFDbc/")
+      it 'removes them and serializes successfully' do
+        expect(body['url']).to eq("/users/abc/")
       end
     end
 
