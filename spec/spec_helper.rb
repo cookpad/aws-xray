@@ -14,6 +14,7 @@ require 'pry'
 $:.unshift File.expand_path('../lib', __dir__)
 require 'aws/xray'
 require 'aws/xray/hooks/all'
+require 'aws/xray/hooks/active_record'
 
 require 'fileutils'
 require 'rack/test'

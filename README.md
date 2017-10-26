@@ -196,6 +196,8 @@ You can enable all the hooks with:
 gem 'aws-xray', require: 'aws/xray/hooks/all'
 ```
 
+NOTE: activerecord hook won't be enabled by this because the hook may produce lots of trace records.
+
 #### net/http hook
 To monkey patch net/http and records out-going http requests automatically, just require `aws/xray/hooks/net_http`:
 
