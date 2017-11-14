@@ -80,7 +80,6 @@ module Aws
           yield base_segment
         rescue Exception => e
           base_segment.set_error(fault: true, e: e)
-          record_traced! if @trace.sampled?
           raise e
         ensure
           base_segment.finish unless base_segment.finished?
@@ -102,7 +101,6 @@ module Aws
           yield sub
         rescue Exception => e
           sub.set_error(fault: true, e: e)
-          record_traced! if @trace.sampled?
           raise e
         ensure
           sub.finish unless sub.finished?
@@ -151,13 +149,6 @@ module Aws
         name = @subsegment_name
         @subsegment_name = nil
         name
-      end
-
-      def record_traced!
-        ::Raven.tags_context(traced: '1') if defined?(::Raven)
-      rescue => e
-        Aws::Xray.config.logger.error("#{e.message}\n#{e.backtrace.join("\n")}")
-        # Ignore the error
       end
     end
   end

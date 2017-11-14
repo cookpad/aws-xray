@@ -25,6 +25,7 @@ module Aws
         trace = build_trace(env[TRACE_ENV])
         env[ORIGINAL_TRACE_ENV] = env[TRACE_ENV] if env[TRACE_ENV] # just for the record
         env[TRACE_ENV] = trace.to_header_value
+        record_context!(trace)
 
         Aws::Xray.trace(name: @name, trace: trace) do |seg|
           seg.set_http_request(Request.build_from_rack_env(env))
@@ -46,6 +47,13 @@ module Aws
 
       def excluded_path?(path)
         !!@excluded_paths.find {|p| p === path }
+      end
+
+      def record_context!(trace)
+        ::Raven.tags_context(xray_sampled: trace.sampled? ? '1' : '0') if defined?(::Raven)
+      rescue => e
+        Aws::Xray.config.logger.error("#{e.message}\n#{e.backtrace.join("\n")}")
+        # Ignore the error
       end
     end
   end
