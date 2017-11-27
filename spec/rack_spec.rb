@@ -168,9 +168,9 @@ RSpec.describe Aws::Xray::Rack do
     context 'when timeout with rack-timeout' do
       let(:app) do
         builder = Rack::Builder.new
-        builder.use Rack::Timeout, service_timeout: 0.01
+        builder.use Rack::Timeout, service_timeout: 0.1
         builder.use described_class
-        builder.run ->(_) { sleep 0.03 }
+        builder.run ->(_) { p _; sleep 0.3 }
         builder
       end
 
