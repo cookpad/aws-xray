@@ -127,7 +127,7 @@ Aws::Xray.config.segment_sending_error_handler = Aws::Xray::ErrorHandlerWithSent
 ```
 
 ### Recording caller of HTTP requests
-Set `Aws::Xray.config.record_caller_of_http_requests = true` if you want investigate the caller of specific HTTP requests.
+Set `Aws::Xray.config.record_caller_of_http_requests = true` if you want to investigate the caller of specific HTTP requests.
 It records caller of net/http and Faraday middleware.
 
 ## Usage
