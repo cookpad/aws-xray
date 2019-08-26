@@ -1,5 +1,5 @@
 module Aws
   module Xray
-    VERSION = '0.37.1'.freeze
+    VERSION = '0.37.2'.freeze
   end
 end
