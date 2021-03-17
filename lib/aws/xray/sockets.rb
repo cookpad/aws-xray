@@ -1,3 +1,5 @@
+require 'stringio'
+
 module Aws
   module Xray
     # For test
