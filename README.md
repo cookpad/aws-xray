@@ -23,7 +23,6 @@ aws-xray has full feautres to build and send tracing data to AWS X-Ray.
 - net/http
 - rack
 - faraday
-- activerecord
 - rsolr
 
 ## Getting started
@@ -196,8 +195,6 @@ You can enable all the hooks with:
 gem 'aws-xray', require: 'aws/xray/hooks/all'
 ```
 
-NOTE: activerecord hook won't be enabled by this because the hook may produce lots of trace records.
-
 #### net/http hook
 To monkey patch net/http and records out-going http requests automatically, just require `aws/xray/hooks/net_http`:
 
@@ -218,11 +215,6 @@ response = Aws::Xray.overwrite(name: 'sns') do
   client.create_topic(...)
 end
 ```
-
-#### activerecord hook
-`require 'aws/xray/hooks/active_record'`.
-
-Note this hook can record large amount of data.
 
 #### rsolr hook
 When you want to name solr requests, use this hook by require `aws/xray/hooks/rsolr`. The typical usecase is you use local haproxy to proxy to solr instances and you want to distinguish these requests from other reqeusts using local haproxy.

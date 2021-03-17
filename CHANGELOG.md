@@ -1,6 +1,9 @@
 # CHANGELOG
 Only breaking or notable changes.
 
+## v0.x.y
+- aws/xray/hooks/active_record was removed because it's not usable due to too many traces
+
 ## v0.34.0
 - Change default sampling rate from 0.1% to undefined. Please set proper sampling rate in your production system.
 
