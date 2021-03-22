@@ -1,7 +1,7 @@
 # CHANGELOG
 Only breaking or notable changes.
 
-## v0.x.y
+## v0.38.0
 - aws/xray/hooks/active_record was removed because it's not usable due to too many traces
 
 ## v0.34.0
