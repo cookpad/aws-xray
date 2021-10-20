@@ -11,7 +11,7 @@ AWS X-Ray is a distributed tracing system. See more detail about AWS X-Ray at [o
 If you want to know what is distributed tracing, what is problems behind, etc.., please refer [Google's Dapper paper](https://research.google.com/pubs/pub36356.html).
 
 ## Features
-aws-xray has full feautres to build and send tracing data to AWS X-Ray.
+aws-xray has full features to build and send tracing data to AWS X-Ray.
 
 - Propagation support in both single and multi thread environments.
 - Instrumentation for major libraries.
