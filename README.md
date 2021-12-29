@@ -1,5 +1,5 @@
 # aws-xray
-[![Build Status](https://travis-ci.org/taiki45/aws-xray.svg?branch=master)](https://travis-ci.org/taiki45/aws-xray)
+[![Build Status](https://github.com/cookpad/aws-xray/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/cookpad/aws-xray/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/aws-xray.svg)](https://badge.fury.io/rb/aws-xray)
 [![Coverage Status](https://coveralls.io/repos/github/taiki45/aws-xray/badge.svg)](https://coveralls.io/github/taiki45/aws-xray)
 [![Inline docs](http://inch-ci.org/github/taiki45/aws-xray.svg?branch=master)](http://inch-ci.org/github/taiki45/aws-xray)
