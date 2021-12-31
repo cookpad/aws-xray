@@ -1,9 +1,0 @@
-language: ruby
-sudo: false
-branches:
-  only:
-    - master
-rvm:
-  - 2.6
-  - 2.7
-  - 3.0
