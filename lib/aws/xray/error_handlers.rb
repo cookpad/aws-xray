@@ -21,12 +21,30 @@ Error: #{error}
       end
     end
 
-    # Must be configured sentry-raven gem.
+    # Must be configured sentry-raven or sentry-ruby gem.
     class ErrorHandlerWithSentry
+      class MissingSentryError < StandardError; end
+
+      def initialize
+        if !defined?(::Sentry) && !defined?(::Raven)
+          raise MissingSentryError.new('Must be installed sentry-raven or sentry-ruby gem')
+        end
+      end
+
       ERROR_LEVEL = 'warning'.freeze
 
       def call(error, payload, host:, port:)
-        ::Raven.capture_exception(
+        if defined?(::Raven)
+          ::Raven.capture_exception(
+            error,
+            level: ERROR_LEVEL,
+            extra: { 'payload' => payload, 'payload_raw' => payload.unpack('H*').first }
+          )
+
+          return
+        end
+
+        ::Sentry.capture_exception(
           error,
           level: ERROR_LEVEL,
           extra: { 'payload' => payload, 'payload_raw' => payload.unpack('H*').first }
