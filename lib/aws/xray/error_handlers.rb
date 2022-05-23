@@ -21,16 +21,24 @@ Error: #{error}
       end
     end
 
-    # Must be configured sentry-raven gem.
+    # Must be configured sentry-raven or sentry-ruby gem.
     class ErrorHandlerWithSentry
       ERROR_LEVEL = 'warning'.freeze
 
       def call(error, payload, host:, port:)
-        ::Raven.capture_exception(
-          error,
-          level: ERROR_LEVEL,
-          extra: { 'payload' => payload, 'payload_raw' => payload.unpack('H*').first }
-        )
+        if defined?(::Sentry)
+          ::Sentry.capture_exception(
+            error,
+            level: ERROR_LEVEL,
+            extra: { 'payload' => payload, 'payload_raw' => payload.unpack('H*').first }
+          )
+        elsif defined?(::Raven)
+          ::Raven.capture_exception(
+            error,
+            level: ERROR_LEVEL,
+            extra: { 'payload' => payload, 'payload_raw' => payload.unpack('H*').first }
+          )
+        end
       end
     end
   end
