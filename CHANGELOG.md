@@ -1,6 +1,9 @@
 # CHANGELOG
 Only breaking or notable changes.
 
+## v0.39.0
+- `ErrorHandlerWithSentry` now supports `sentry-ruby` gem.
+
 ## v0.38.0
 - aws/xray/hooks/active_record was removed because it's not usable due to too many traces
 
